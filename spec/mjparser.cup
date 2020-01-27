@@ -54,8 +54,10 @@ scan with {:
 :}
 
 
-terminal PROG, LBRACE, RBRACE, SEMI, LPAREN, RPAREN, COMMA, PRINT, RETURN, PLUS, EQUAL, VOID;
-terminal Integer NUMBER ;
+terminal PROGRAM, OP_LEFT_BRACE, OP_RIGHT_BRACE, OP_SEMICOLON, OP_LEFT_PAREN, OP_RIGHT_PAREN, COMMA, PRINT, RETURN, PLUS, EQUAL, VOID, CLASS, ABSTRACT;
+terminal Integer NUM_CONST;
+terminal Boolean BOOL_CONST;
+terminal Character CHAR_CONST;
 terminal String IDENT ;
 terminal IF, ELSE;
 
@@ -63,11 +65,12 @@ nonterminal MethodDeclList, VarDecl;
 nonterminal FormalParamList, FormalParamDecl, FormPars, ActualPars, ActualParamList; 
 nonterminal StatementList, Statement, Addop;
 nonterminal Unmatched, Matched;
+nonterminal ExtendDecl, ClassDecl, AbstractClassDecl, AbstractMethodDecl, AnyMethodDecl, AnyMethod;
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr, Factor, VarDeclList; 
 
-Program ::= (Program) PROG ProgName:p VarDeclList LBRACE MethodDeclList RBRACE 
+Program ::= (Program) PROGRAM ProgName:p VarDeclList OP_LEFT_BRACE MethodDeclList OP_RIGHT_BRACE 
 ;
 
 ProgName ::= (ProgName) IDENT:pName 
@@ -78,19 +81,41 @@ VarDeclList ::= (VarDeclarations) VarDeclList VarDecl
 				(NoVarDecl)/* epsilon */ 
 				;
 				
-VarDecl ::= (VarDecl) Type:varType IDENT:varName SEMI 
+VarDecl ::= (VarDecl) Type:varType IDENT:varName OP_SEMICOLON
 ;
 
-Type ::= (Type) IDENT:typeName 
+ClassDecl ::= (Class) CLASS IDENT:ClassName ExtendDecl OP_LEFT_BRACE
+				VarDeclList OP_LEFT_BRACE MethodDeclList OP_RIGHT_BRACE
+				OP_RIGHT_BRACE;
+				
+AbsClassDecl ::= (AbsClass) ABSTRACT CLASS IDENT:ClassName ExtendDecl OP_LEFT_BRACE
+				VarDeclList OP_LEFT_BRACE AnyMethodDeclList OP_RIGHT_BRACE
+				OP_RIGHT_BRACE;
+				
+ExtendDecl ::= (Extend) EXTENDS Type
+				|
+				(NoExtend);
+
+Type ::= (Type) IDENT:typeName;
 ;
 
 MethodDeclList ::= (MethodDeclarations) MethodDeclList MethodDecl
 					|
 					(NoMethodDecl)/* epsilon */
 					;
+					
+AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList MethodDecl
+					|
+					(AnyAbslMethodDeclarations) AnyMethodDeclList AbsMethodDecl
+					|
+					(NoMethodDecl);
 
 MethodDecl ::= (MethodDecl) MethodTypeName
-			   LPAREN FormPars RPAREN VarDeclList LBRACE StatementList RBRACE 
+			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN VarDeclList OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
+			   ;
+			   
+AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName
+			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
 			   ;
 
 MethodTypeName ::= (MethodTypeName) Type:retType IDENT:methName
@@ -115,20 +140,20 @@ Statement ::= (MatchedStmt) Matched | (UnmachedStmt) Unmatched ;
 Unmatched ::= (UnmatchedIf) IF Expr Statement | (UnmatchedIfElse) IF Expr Matched ELSE Unmatched;
 	
 				  
-Matched ::= (Assignment) Designator:dest EQUAL Expr:e SEMI 
+Matched ::= (Assignment) Designator:dest EQUAL Expr:e OP_OP_SEMICOLONCOLON 
 			  |
-			  (ErrAssignment) Designator EQUAL error SEMI
+			  (ErrAssignment) Designator EQUAL error OP_OP_SEMICOLONCOLON
 			  {: parser.log.debug("Uspesan oporavak od greske pri dodeli vrednosti."); :}
 			  |
-			  (PrintStmt) PRINT LPAREN Expr RPAREN SEMI 
+			  (PrintStmt) PRINT OP_LEFT_PAREN Expr OP_RIGHT_PAREN OP_OP_SEMICOLONCOLON 
 			  |
-			  (ReturnExpr) RETURN Expr:t SEMI
+			  (ReturnExpr) RETURN Expr:t OP_SEMICOLON
 			  |
-			  (ReturnNoExpr) RETURN SEMI
+			  (ReturnNoExpr) RETURN OP_SEMICOLON
 			  | 
 			  (MatchedIf) IF Expr Matched ELSE Matched
 			  |
-			  (ProcCall) Designator:func LPAREN ActualPars RPAREN SEMI
+			  (ProcCall) Designator:func OP_LEFT_PAREN ActualPars OP_RIGHT_PAREN OP_SEMICOLON
 			  ;
 			  
 Expr ::= (AddExpr) Expr:te Addop Term:t
@@ -143,7 +168,7 @@ Factor ::= (Const) NUMBER
 			|
 		   (Var) Designator:d
 		    |
-		   (FuncCall) Designator:func LPAREN ActualPars RPAREN
+		   (FuncCall) Designator:func OP_LEFT_PAREN ActualPars OP_RIGHT_PAREN
 		   ;
 
 ActualPars ::= (Actuals) ActualParamList 
