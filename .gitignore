@@ -19,7 +19,9 @@ local.properties
 .classpath
 .settings/
 .loadpath
-*.log*
+*.log
+logs/
+src/rs/ac/bg/etf/pp1/Yylex.java~
 
 # External tool builders
 .externalToolBuilders/
