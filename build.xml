@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project
         name="MJCompiler"
-        basedir=""
+        basedir="."
         >
 	
 	<target name="delete">
@@ -16,7 +16,7 @@
 	<target name="lexerGen">
 		<java jar="lib/JFlex.jar" fork="true">
 			<arg value="-d"/>
-			<arg value="-./src/rs/ac/bg/etf/pp1"/>
+			<arg value="./src/rs/ac/bg/etf/pp1"/>
 			<arg value="spec/mjlexer.flex"/>
 		</java>
 	</target>
