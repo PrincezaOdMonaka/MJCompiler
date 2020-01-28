@@ -54,21 +54,32 @@ scan with {:
 :}
 
 
-terminal PROGRAM, OP_LEFT_BRACE, OP_RIGHT_BRACE, OP_SEMICOLON, OP_LEFT_PAREN, OP_RIGHT_PAREN, COMMA, PRINT, RETURN, PLUS, EQUAL, VOID, CLASS, ABSTRACT;
+terminal PROGRAM, VOID, OP_LEFT_BRACE, OP_RIGHT_BRACE, OP_SEMICOLON, OP_LEFT_PAREN, OP_RIGHT_PAREN, 
+OP_COMMA, PRINT, RETURN, OP_PLUS, OP_EQUALS, CLASS, ABSTRACT, OP_LEFT_SQUARE, OP_RIGHT_SQUARE,
+CONST, EXTENDS, OP_OR, OP_AND, BREAK, CONTINUE, READ, NEW, FOR, OP_ASSIGN;
+terminal OP_DOT, OP_MINUS, OP_MUL, OP_DIV, OP_MOD;
+terminal OP_NOT_EQUALS, OP_GREATER_THAN, OP_GREATER_EQUAL, OP_LESS_THAN, OP_LESS_EQUAL;
 terminal Integer NUM_CONST;
 terminal Boolean BOOL_CONST;
 terminal Character CHAR_CONST;
 terminal String IDENT ;
 terminal IF, ELSE;
 
-nonterminal MethodDeclList, VarDecl;
-nonterminal FormalParamList, FormalParamDecl, FormPars, ActualPars, ActualParamList; 
-nonterminal StatementList, Statement, Addop;
-nonterminal Unmatched, Matched;
-nonterminal ExtendDecl, ClassDecl, AbstractClassDecl, AbstractMethodDecl, AnyMethodDecl, AnyMethod;
+nonterminal MethodDeclList, DeclList;
+nonterminal FormalParamList, FormalParamDecl, FormPars, ActPars, ActualParamList, ForStmt, Addop, Mulop, Relop; 
+nonterminal StatementList, Statement,
+DesignatorStmt, DesignatorStmtOpt;
+nonterminal CondStatement, CondTerm, CondFact,CondStatementOpt, ElseStatement;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName; 
-nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Term, Expr, Factor, VarDeclList; 
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, VarDeclBase;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; nonterminal rs.etf.pp1.symboltable.concepts.Struct Term; nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr; nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
+
+nonterminal VarDeclList, VarDeclMul;
+nonterminal ConstDeclChar, ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
+
+nonterminal ClassDecl, ClassMethodDeclList, AbsClassDecl, AbsClassMethodDeclList, AnyMethodDeclList, ExtendDecl, AbsMethodDecl;
+
+
 
 precedence left ELSE;
 
@@ -80,7 +91,7 @@ ProgName ::= (ProgName) IDENT:pName
 
 DeclList ::= (DeclarationListConst) DeclList ConstDecl
 			|
-			 (DeclarationListVar) DeclList VarDecl
+			 (DeclarationListVar) DeclList VarDeclList
 			|
 		     (DeclarationListAbs) DeclList AbsClassDecl
 		    |
@@ -98,23 +109,23 @@ VarDeclBase ::= (VarDecl) IDENT:varName
 				(VarDeclArr) IDENT:varName OP_LEFT_SQUARE OP_RIGHT_SQUARE
 ;
 
-ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_EQUALS CHAR_CONST;
+ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_ASSIGN CHAR_CONST;
 ConstDeclCharMul ::= (ConstDeclarationCharMul) ConstDeclCharMul OP_COMMA ConstDeclChar
 					| (NoConstDeclCharMul);
 
-ConstDeclNum ::= (ConstDeclarationChar) IDENT:cName OP_EQUALS NUM_CONST;
+ConstDeclNum ::= (ConstDeclarationNum) IDENT:cName OP_ASSIGN NUM_CONST;
 ConstDeclNumMul ::= (ConstDeclarationNumMul) ConstDeclNumMul OP_COMMA ConstDeclNum
 					| (NoConstDeclNumMul);
 					
-ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_EQUALS BOOL_CONST;
+ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_ASSIGN BOOL_CONST;
 ConstDeclBoolMul ::= (ConstDeclarationBoolMul) ConstDeclBoolMul OP_COMMA ConstDeclBool
 					| (NoConstDeclBoolMul);
 					
 ConstDeclAny ::= (ConstDeclAnyBool) ConstDeclBool | (ConstDeclAnyNum) ConstDeclNum | (ConstDeclAnyChar) ConstDeclChar;
 
-ConstDecl ::= (ConstDeclChar) CONST Type:varType ConstDeclChar ConstDeclCharMul OP_SEMICOLON
-			| (ConstDeclNum) CONST Type:varType ConstDeclNum ConstDeclNumMul OP_SEMICOLON
-			| (ConstDeclBool) CONST Type:varType ConstDeclBool ConstDeclBoolMul OP_SEMICOLON
+ConstDecl ::= (ConstDeclrChar) CONST Type:varType ConstDeclChar ConstDeclCharMul OP_SEMICOLON
+			| (ConstDeclrNum) CONST Type:varType ConstDeclNum ConstDeclNumMul OP_SEMICOLON
+			| (ConstDeclrBool) CONST Type:varType ConstDeclBool ConstDeclBoolMul OP_SEMICOLON;
 
 ClassDecl ::= (Class) CLASS IDENT:ClassName ExtendDecl OP_LEFT_BRACE
 				VarDeclList ClassMethodDeclList	OP_RIGHT_BRACE;
@@ -134,7 +145,6 @@ ExtendDecl ::= (Extend) EXTENDS Type
 				(NoExtend);
 
 Type ::= (Type) IDENT:typeName;
-;
 
 MethodDeclList ::= (MethodDeclarations) MethodDeclList MethodDecl
 					|
@@ -145,7 +155,7 @@ AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList MethodDecl
 					|
 					(AnyAbslMethodDeclarations) AnyMethodDeclList AbsMethodDecl
 					|
-					(NoMethodDecl);
+					(NoAnyMethodDecl);
 
 MethodDecl ::= (MethodDecl) MethodTypeName
 			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN VarDeclList OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
@@ -160,7 +170,7 @@ MethodTypeName ::= (MethodTypeName) Type:retType IDENT:methName
 
 FormPars ::= (FormParams) FormalParamList | (NoFormParam) /* epsilon */ ;
 
-FormalParamList ::= (FormalParamDecls) FormalParamList COMMA FormalParamDecl
+FormalParamList ::= (FormalParamDecls) FormalParamList OP_COMMA FormalParamDecl
 					|
 					(SingleFormalParamDecl) FormalParamDecl
 					;
@@ -174,7 +184,7 @@ StatementList ::= (Statements) StatementList Statement
 
 Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 			  |
-			  (ConditionStatement) CondStatement
+			  (ConditionStatement) IF OP_LEFT_PAREN CondStatement OP_RIGHT_PAREN Statement ElseStatement
 			  |
 			  (ForStatement) ForStmt
 			  |
@@ -186,7 +196,7 @@ Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 			  |
 			  (PrintStmt) PRINT OP_LEFT_PAREN Expr OP_RIGHT_PAREN OP_SEMICOLON 
 			  |
-		      (ReadStatement) READ OP_LEFT_PAREN DesignatorBase OP_RIGHT_PAREN OP_SEMICOLON
+		      (ReadStatement) READ OP_LEFT_PAREN Designator OP_RIGHT_PAREN OP_SEMICOLON
 ;
 
 Designator ::= (DesignatorBase) IDENT:name
@@ -194,17 +204,20 @@ Designator ::= (DesignatorBase) IDENT:name
 			 | (DesignatorIndex) Designator OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
 ;
 
-DesignatorStmt ::= (DesignatorStatementAssign) Designator OP_EQUALS Expr
+DesignatorStmt ::= (DesignatorStatementAssign) Designator OP_ASSIGN Expr
 				| (DesignatorStatementFcall) Designator OP_LEFT_PAREN ActPars OP_RIGHT_PAREN
 				| (DesignatorStatementPostinc) Designator OP_PLUS OP_PLUS
 				| (DesignatorStatementPostdec) Designator OP_MINUS OP_MINUS
 ;
 
-DesignatorStmtOpt :: = (DesignatorStatementOptional) DesignatorStmt
+DesignatorStmtOpt ::= (DesignatorStatementOptional) DesignatorStmt
 					| (NoDesignatorStatement)
 					;
+					
+ElseStatement ::= (ElseStmt) ELSE Statement
+				| (NoElseStmt);
 
-CondStatement ::= (ConditionStatement) CondStatement OP_OR OP_OR CondTerm
+CondStatement ::= (ConditionStmt) CondStatement OP_OR OP_OR CondTerm
 				| (CondBaseStatement) CondTerm;
 				
 CondTerm ::= (ConditionTerm) CondTerm OP_AND OP_AND CondFact
@@ -213,18 +226,20 @@ CondTerm ::= (ConditionTerm) CondTerm OP_AND OP_AND CondFact
 CondFact ::= (CondFactSimple) Expr
 			| (CondFactRelop) Expr Relop Expr;
 			
-CondStatementOpt ::= (CondStmtOpt) ContStatement
+CondStatementOpt ::= (CondStmtOpt) CondStatement
 					| (NoCondStmt)
 					;
 			  
-Expr ::= (NegativeExpr) OP_MINUS Expr:te
+Expr ::= (TermExpr) Term:t
+		 |
+		 (NegativeExpr) OP_MINUS Term:t
 		 |
 		 (AddExpr) Expr:te Addop Term:t
-		 |
-		 (TermExpr) Term:t
 		 ;
+		 
+		 
 
-Term ::= (Term) Term:t Mulop Factor:f | (BaseTerm) Factor:f 
+Term ::= (TermMul) Term:t Mulop Factor:f | (BaseTerm) Factor:f 
 ;
 
 Factor ::= (FactorConst) ConstDeclAny
@@ -233,7 +248,7 @@ Factor ::= (FactorConst) ConstDeclAny
 			|
 			(FactorNewArray) NEW Type OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE
 		    |
-		    (FactorFuncCall) Designator:func OP_LEFT_PAREN ActualPars OP_RIGHT_PAREN
+		    (FactorFuncCall) Designator:func OP_LEFT_PAREN ActPars OP_RIGHT_PAREN
 		    |
 		    (FactorParen) OP_LEFT_BRACE Expr OP_RIGHT_BRACE
 		    ;
@@ -243,15 +258,28 @@ ActPars ::= (ActualsPars) ActualParamList
 		    (NoActuals) /* epsilon */ 
 		    ;
 			   
-ActualParamList ::= (ActualParams) ActualParamList COMMA Expr
+ActualParamList ::= (ActualParams) ActualParamList OP_COMMA Expr
 					|
 					(ActualParam) Expr
 					;
 
-ForStmt ::= (ForStmt) FOR OP_LEFT_BRACE DesignatorStmtOpt OP_SEMI 
-					ContStatementOpt OP_SEMI DesignatorStmtOpt OP_RIGHT_BRACE
+ForStmt ::= (ForStmt) FOR OP_LEFT_BRACE DesignatorStmtOpt OP_SEMICOLON 
+					CondStatementOpt OP_SEMICOLON DesignatorStmtOpt OP_RIGHT_BRACE
 					Statement
 					;
 
 Addop ::= (Addopr) OP_PLUS | (Subopr) OP_MINUS ;
 Mulop ::= (Mulopr) OP_MUL | (Divopr) OP_DIV | (Modopr) OP_MOD;
+
+Relop ::= (RelopEq) OP_EQUALS
+    |
+    (RelopNeq) OP_NOT_EQUALS
+    |
+    (RelopGt) OP_GREATER_THAN
+    |
+    (RelopGteq) OP_GREATER_EQUAL
+    |
+    (RelopLt) OP_LESS_THAN
+    |
+    (RelopLeq) OP_LESS_EQUAL
+    ;

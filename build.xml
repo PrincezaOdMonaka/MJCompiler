@@ -21,12 +21,25 @@
 		</java>
 	</target>
 	
-	<target name="compile" depends="lexerGen">
-		<javac srcdir="src/rs/ac/bg/etf/pp1" includeantruntime="false">
-			<classpath>
-				<pathelement path="lib/JFlex.jar"/>
-				<pathelement path="cup_v10k.jar"/>
-			</classpath>
-		</javac>
+    <target name="parserGen" depends="lexerGen" unless="parserGen.notRequired">
+        <delete>
+            <fileset dir="src/rs/ac/bg/etf/pp1/ast">
+            </fileset>
+        </delete>
+        <java jar="lib/cup_v10k.jar" fork="true">
+            <arg value="-destdir"/>
+            <arg value="src/rs/ac/bg/etf/pp1"/>
+            <arg value="-ast"/>
+            <arg value="src.rs.ac.bg.etf.pp1.ast"/>
+            <arg value="-parser"/>
+            <arg value="MJParser"/>
+            <arg value="spec/mjparser.cup"/>
+        </java>
+    </target>
+	<target name="repackage" depends="parserGen">
+	<!--
+	 Replaces all of the references to the old package name in files in the "src" directory 
+	-->
+	<replace dir="src" value="rs.ac.bg.etf.pp1.ast" token="src.rs.ac.bg.etf.pp1.ast" summary="true"/>
 	</target>
 </project>
