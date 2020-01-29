@@ -50,6 +50,7 @@ import java_cup.runtime.Symbol;
 "read" 		{ return new_symbol(sym.READ, yytext()); }
 "for" 		{ return new_symbol(sym.FOR, yytext()); }
 "continue" 	{ return new_symbol(sym.CONTINUE, yytext()); }
+"extends" 	{ return new_symbol(sym.EXTENDS, yytext()); }
 
 [0-9]+ { return new_symbol(sym.NUM_CONST, new Integer(yytext())); }
 '.' { return new_symbol(sym.CHAR_CONST, yytext().charAt(1)); }
@@ -71,8 +72,8 @@ import java_cup.runtime.Symbol;
 "&&" { return new_symbol(sym.OP_AND, yytext()); }
 "||" { return new_symbol(sym.OP_OR, yytext()); }
 "=" { return new_symbol(sym.OP_ASSIGN, yytext()); }
-"++" { return new_symbol(sym.OP_PLUS, yytext()); }
-"--" { return new_symbol(sym.OP_MINUS, yytext()); }
+"++" { return new_symbol(sym.OP_PLUSPLUS, yytext()); }
+"--" { return new_symbol(sym.OP_MINUSMINUS, yytext()); }
 ";" { return new_symbol(sym.OP_SEMICOLON, yytext()); }
 "," { return new_symbol(sym.OP_COMMA, yytext()); }
 "." { return new_symbol(sym.OP_DOT, yytext()); }
