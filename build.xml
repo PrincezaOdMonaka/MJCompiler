@@ -4,15 +4,6 @@
         basedir="."
         >
 	
-	<target name="delete">
-		<delete>
-			<fileset dir="src/rs/ac/bg/etf/pp1">
-				<exclude name="sym.java"/>
-				<exclude name="util/Log4JUtils.java"/>
-			</fileset>
-		</delete>
-	</target>
-	
 	<target name="lexerGen">
 		<java jar="lib/JFlex.jar" fork="true">
 			<arg value="-d"/>

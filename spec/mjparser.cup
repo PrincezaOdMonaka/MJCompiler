@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.pp1;
 
+import rs.etf.pp1.symboltable.*;
 import java_cup.runtime.*;
 import org.apache.log4j.*;
 
@@ -79,15 +80,19 @@ nonterminal StatementList, Statement,
 DesignatorStmt, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
 
-nonterminal Program, ProgName, Designator, MethodDecl, MethodTypeName, VarDeclBase;
-nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; nonterminal rs.etf.pp1.symboltable.concepts.Struct Term; nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr; nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
+nonterminal Designator, MethodDecl, MethodTypeName, VarDeclBase;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName;
 
 nonterminal VarDeclList, VarDeclMul, VarDeclListOpt;
 nonterminal ConstDeclChar, ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
 
 nonterminal ClassDecl, ClassMethodDeclList, AbsClassDecl, AbsClassMethodDeclList, AnyMethodDeclList, ExtendDecl, AbsMethodDecl;
 nonterminal VarDeclListMul;
-
 
 precedence left ELSE;
 
@@ -112,11 +117,11 @@ DeclList ::= (DeclarationListConst) DeclList ConstDecl
 
 VarDeclListMul ::= (VarDeclarationListMulVar) VarDeclListMul VarDeclList
 				| (NoVarDeclListMul);
-
-VarDeclList ::= (VarDeclList)Type:varType VarDeclBase VarDeclMul OP_SEMICOLON;
 				
 VarDeclMul ::= (VarDeclarationMul) VarDeclMul OP_COMMA VarDeclBase
 				| (NoVarDeclMul);
+
+VarDeclList ::= (VarDeclList)Type:varType VarDeclBase VarDeclMul OP_SEMICOLON;
 				
 VarDeclBase ::= (VarDecl) IDENT:varName 
 				|

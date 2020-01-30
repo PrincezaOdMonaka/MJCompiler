@@ -1,5 +1,6 @@
 package rs.ac.bg.etf.pp1;
 
+import rs.etf.pp1.symboltable.*;
 import java_cup.runtime.*;
 import org.apache.log4j.*;
 
@@ -96,13 +97,16 @@ nonterminal CondTerm CondTerm;
 nonterminal CondFact CondFact;
 nonterminal ElseStatement ElseStatement;
 
-nonterminal Program Program;
-nonterminal ProgName ProgName;
 nonterminal Designator Designator;
 nonterminal MethodDecl MethodDecl;
 nonterminal MethodTypeName MethodTypeName;
 nonterminal VarDeclBase VarDeclBase;
-nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; nonterminal rs.etf.pp1.symboltable.concepts.Struct Term; nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr; nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName;
 
 nonterminal VarDeclList VarDeclList;
 nonterminal VarDeclMul VarDeclMul;
@@ -124,7 +128,6 @@ nonterminal AnyMethodDeclList AnyMethodDeclList;
 nonterminal ExtendDecl ExtendDecl;
 nonterminal AbsMethodDecl AbsMethodDecl;
 nonterminal VarDeclListMul VarDeclListMul;
-
 
 precedence left ELSE;
 
@@ -149,11 +152,11 @@ DeclList ::= (DeclarationListConst) DeclList:D1 ConstDecl:C2 {: RESULT=new Decla
 
 VarDeclListMul ::= (VarDeclarationListMulVar) VarDeclListMul:V1 VarDeclList:V2 {: RESULT=new VarDeclarationListMulVar(V1, V2); RESULT.setLine(V1left); :}
 				| (NoVarDeclListMul) {: RESULT=new NoVarDeclListMul(); :};
-
-VarDeclList ::= (VarDeclList)Type:varType VarDeclBase:V1 VarDeclMul:V2 OP_SEMICOLON {: RESULT=new VarDeclList(varType, V1, V2); RESULT.setLine(varTypeleft); :};
 				
 VarDeclMul ::= (VarDeclarationMul) VarDeclMul:V1 OP_COMMA VarDeclBase:V2 {: RESULT=new VarDeclarationMul(V1, V2); RESULT.setLine(V1left); :}
 				| (NoVarDeclMul) {: RESULT=new NoVarDeclMul(); :};
+
+VarDeclList ::= (VarDeclList)Type:varType VarDeclBase:V1 VarDeclMul:V2 OP_SEMICOLON {: RESULT=new VarDeclList(varType, V1, V2); RESULT.setLine(varTypeleft); :};
 				
 VarDeclBase ::= (VarDecl) IDENT:varName {: RESULT=new VarDecl(varName); RESULT.setLine(varNameleft); :} 
 				|
