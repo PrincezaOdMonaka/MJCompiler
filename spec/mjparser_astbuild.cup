@@ -98,15 +98,14 @@ nonterminal CondFact CondFact;
 nonterminal ElseStatement ElseStatement;
 
 nonterminal Designator Designator;
-nonterminal MethodDecl MethodDecl;
-nonterminal MethodTypeName MethodTypeName;
 nonterminal VarDeclBase VarDeclBase;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, 
+      MethodDecl, MethodTypeName;
 
 nonterminal VarDeclList VarDeclList;
 nonterminal VarDeclMul VarDeclMul;
@@ -209,16 +208,16 @@ AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList:A1 MethodDecl:M2
 					|
 					(NoAnyMethodDecl) {: RESULT=new NoAnyMethodDecl(); :};
 
-MethodDecl ::= (MethodDeclaration) MethodTypeName:M1
-			   OP_LEFT_PAREN FormPars:F2 OP_RIGHT_PAREN VarDeclListMul:V3 OP_LEFT_BRACE StatementList:S4 OP_RIGHT_BRACE {: RESULT=new MethodDeclaration(M1, F2, V3, S4); RESULT.setLine(M1left); :} 
+MethodDecl ::= (MethodDeclaration) MethodTypeName:typeName
+			   OP_LEFT_PAREN FormPars:F1 OP_RIGHT_PAREN VarDeclListMul:V2 OP_LEFT_BRACE StatementList:S3 OP_RIGHT_BRACE {: RESULT=new MethodDeclaration(typeName, F1, V2, S3); RESULT.setLine(typeNameleft); :} 
 			   	|		 (MethodDeclError) error {: parser.report_error_on_err_token("Error in method decl declaration"); :} {: RESULT=new MethodDeclError(); :}
 			   ;
 			   
-AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName:M1
-			   OP_LEFT_PAREN FormPars:F2 OP_RIGHT_PAREN OP_SEMICOLON {: RESULT=new AbsMethodDecl(M1, F2); RESULT.setLine(M1left); :};
+AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName:typeName
+			   OP_LEFT_PAREN FormPars:F1 OP_RIGHT_PAREN OP_SEMICOLON {: RESULT=new AbsMethodDecl(typeName, F1); RESULT.setLine(typeNameleft); :};
 
 MethodTypeName ::= (TypeMethodTypeName) Type:retType IDENT:methName {: RESULT=new TypeMethodTypeName(retType, methName); RESULT.setLine(retTypeleft); :}
-					| (VoidMethodTypeName) VOID IDENT: methName {: RESULT=new VoidMethodTypeName(methName); RESULT.setLine(methNameleft); :}
+					| (VoidMethodTypeName) VOID:retType IDENT:methName {: RESULT=new VoidMethodTypeName(methName); RESULT.setLine(methNameleft); :}
 ;
 
 FormPars ::= (FormParams) FormalParamList:F1 {: RESULT=new FormParams(F1); RESULT.setLine(F1left); :} | (NoFormParam) {: RESULT=new NoFormParam(); :} /* epsilon */ ;

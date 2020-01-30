@@ -3,6 +3,10 @@ program MJProgram
 	const int y = 5;
 	int a[];
 {
+
+	void b(int m, char n) bool p; {
+		return;
+	}
 	
 	int k () int c; {
 		c = 1;

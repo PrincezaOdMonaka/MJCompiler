@@ -10,6 +10,7 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	Logger log = Logger.getLogger(getClass());
 	int varDeclCount = 0;
+	Obj method = null;
 	int printCallCount = 0;
 	
 	public int getPrintCallCount() {
@@ -18,6 +19,10 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	public void visit(VarDeclList varDeclList) {
 		
+	}
+	
+	public SemanticPass() {
+        Tab.insert(Obj.Type, "bool", new Struct(Struct.Bool));
 	}
 	
     public void visit(Type type){
@@ -98,7 +103,30 @@ public class SemanticPass extends VisitorAdaptor {
 		constObj.setAdr(constNum.getCVal());
 	}
 	
+	public void visit(TypeMethodTypeName methodTypeName) {
+		methodTypeName.obj = method = Tab.insert(Obj.Meth, methodTypeName.getMethName(), 
+				methodTypeName.getType().struct);
+		Tab.openScope();
+		method.setLevel(0);
+		method.setFpPos(0);
+	}
 	
+	public void visit(VoidMethodTypeName methodTypeName) {
+		methodTypeName.obj = method = Tab.insert(Obj.Meth, methodTypeName.getMethName(), 
+				Tab.noType);
+		Tab.openScope();
+		method.setLevel(0);
+		method.setFpPos(0);
+	}
+	
+	
+	public void visit(MethodDeclaration methodDecl) {
+    	Tab.chainLocalSymbols(methodDecl.getMethodTypeName().obj);
+    	log.info(methodDecl.getMethodTypeName().obj.toString());
+    	Tab.closeScope();
+    	
+    	method = null;
+	}
 	
     public void visit(ProgName progName) { 
     	progName.obj = Tab.insert(Obj.Prog, progName.getPName(), Tab.noType);
@@ -106,7 +134,6 @@ public class SemanticPass extends VisitorAdaptor {
     }
     
     public void visit(Program program) { 
-    	log.info("obj" + program.getProgName().obj);
     	Tab.chainLocalSymbols(program.getProgName().obj);
     	Tab.closeScope();
     }

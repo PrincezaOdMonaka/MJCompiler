@@ -80,13 +80,14 @@ nonterminal StatementList, Statement,
 DesignatorStmt, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
 
-nonterminal Designator, MethodDecl, MethodTypeName, VarDeclBase;
+nonterminal Designator, VarDeclBase;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, 
+      MethodDecl, MethodTypeName;
 
 nonterminal VarDeclList, VarDeclMul, VarDeclListOpt;
 nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
@@ -181,16 +182,16 @@ AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList MethodDecl
 					|
 					(NoAnyMethodDecl);
 
-MethodDecl ::= (MethodDeclaration) MethodTypeName
+MethodDecl ::= (MethodDeclaration) MethodTypeName:typeName
 			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN VarDeclListMul OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
 			   	|		 (MethodDeclError) error {: parser.report_error_on_err_token("Error in method decl declaration"); :}
 			   ;
 			   
-AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName
+AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName:typeName
 			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN OP_SEMICOLON;
 
 MethodTypeName ::= (TypeMethodTypeName) Type:retType IDENT:methName
-					| (VoidMethodTypeName) VOID IDENT: methName
+					| (VoidMethodTypeName) VOID:retType IDENT:methName
 ;
 
 FormPars ::= (FormParams) FormalParamList | (NoFormParam) /* epsilon */ ;
