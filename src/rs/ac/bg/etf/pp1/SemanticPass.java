@@ -44,10 +44,61 @@ public class SemanticPass extends VisitorAdaptor {
 
 		declList = (VarDeclList) parent;
 		Obj varObj = Tab.insert(Obj.Var, varDecl.getVarName(), declList.getType().struct);
-		log.info(varDecl.toString("")+"\n\n"+declList.getType().toString("")+declList.getType().struct);
-		log.info(varObj.getName() + " " + varObj.getType() + " " + varObj.getAdr());
-		varDeclCount++;
 	}
+	
+	public void visit(VarDeclArr varDeclArr) {
+		VarDeclList declList;
+		SyntaxNode parent;
+		for(parent = varDeclArr.getParent(); 
+				!(parent instanceof VarDeclList); 
+				parent = parent.getParent());
+
+		declList = (VarDeclList) parent;
+		Struct arrayType = new Struct(Struct.Array, declList.getType().struct);
+		Obj varObj = Tab.insert(Obj.Var, varDeclArr.getVarName(), arrayType);
+	}
+	
+	public void visit(ConstDeclarationChar constChar) {
+		ConstDeclrChar declList;
+		SyntaxNode parent;
+		for(parent = constChar.getParent(); 
+				!(parent instanceof ConstDeclrChar); 
+				parent = parent.getParent());
+
+		declList = (ConstDeclrChar) parent;
+		Obj constObj = Tab.insert(Obj.Con, constChar.getCName(), 
+				declList.getType().struct);
+	}
+	
+	public void visit(ConstDeclarationBool constBool) {
+		ConstDeclrBool declList;
+		SyntaxNode parent;
+		for(parent = constBool.getParent(); 
+				!(parent instanceof ConstDeclrBool); 
+				parent = parent.getParent());
+
+		declList = (ConstDeclrBool) parent;
+		Obj constObj = Tab.insert(Obj.Con, constBool.getCName(), 
+				declList.getType().struct);
+		
+		constObj.setAdr(constBool.getCVal()?1:0);
+	}
+	
+	public void visit(ConstDeclarationNum constNum) {
+		ConstDeclrNum declList;
+		SyntaxNode parent;
+		for(parent = constNum.getParent(); 
+				!(parent instanceof ConstDeclrNum); 
+				parent = parent.getParent());
+
+		declList = (ConstDeclrNum) parent;
+		Obj constObj = Tab.insert(Obj.Con, constNum.getCName(), 
+				declList.getType().struct);
+		
+		constObj.setAdr(constNum.getCVal());
+	}
+	
+	
 	
     public void visit(ProgName progName) { 
     	progName.obj = Tab.insert(Obj.Prog, progName.getPName(), Tab.noType);
@@ -59,4 +110,5 @@ public class SemanticPass extends VisitorAdaptor {
     	Tab.chainLocalSymbols(program.getProgName().obj);
     	Tab.closeScope();
     }
+    
 }

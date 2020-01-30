@@ -1,5 +1,7 @@
 program MJProgram
-	int x; int y;
+	int x; 
+	const int y = 5;
+	int a[];
 {
 	
 	int k () int c; {
@@ -8,7 +10,6 @@ program MJProgram
 	}
 	
 	int main() {
-		y = 2;
 		x = y + 2;
 		y = k() + 3;
 		print(y);

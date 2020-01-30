@@ -89,7 +89,9 @@ nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName;
 
 nonterminal VarDeclList, VarDeclMul, VarDeclListOpt;
-nonterminal ConstDeclChar, ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
+	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
+	ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
 
 nonterminal ClassDecl, ClassMethodDeclList, AbsClassDecl, AbsClassMethodDeclList, AnyMethodDeclList, ExtendDecl, AbsMethodDecl;
 nonterminal VarDeclListMul;
@@ -131,15 +133,15 @@ VarDeclBase ::= (VarDecl) IDENT:varName
 VarDeclListOpt ::= (VarDeclarationListOpt) VarDeclList
 					| (NoVarDeclList);
 
-ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_ASSIGN CHAR_CONST;
+ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_ASSIGN CHAR_CONST:cVal;
 ConstDeclCharMul ::= (ConstDeclarationCharMul) ConstDeclCharMul OP_COMMA ConstDeclChar
 					| (NoConstDeclCharMul);
 
-ConstDeclNum ::= (ConstDeclarationNum) IDENT:cName OP_ASSIGN NUM_CONST;
+ConstDeclNum ::= (ConstDeclarationNum) IDENT:cName OP_ASSIGN NUM_CONST:cVal;
 ConstDeclNumMul ::= (ConstDeclarationNumMul) ConstDeclNumMul OP_COMMA ConstDeclNum
 					| (NoConstDeclNumMul);
 					
-ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_ASSIGN BOOL_CONST;
+ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_ASSIGN BOOL_CONST:cVal;
 ConstDeclBoolMul ::= (ConstDeclarationBoolMul) ConstDeclBoolMul OP_COMMA ConstDeclBool
 					| (NoConstDeclBoolMul);
 					

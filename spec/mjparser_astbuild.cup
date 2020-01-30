@@ -111,14 +111,9 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName;
 nonterminal VarDeclList VarDeclList;
 nonterminal VarDeclMul VarDeclMul;
 nonterminal VarDeclListOpt VarDeclListOpt;
-nonterminal ConstDeclChar ConstDeclChar;
-nonterminal ConstDeclCharMul ConstDeclCharMul;
-nonterminal ConstDeclNum ConstDeclNum;
-nonterminal ConstDeclNumMul ConstDeclNumMul;
-nonterminal ConstDeclBool ConstDeclBool;
-nonterminal ConstDeclBoolMul ConstDeclBoolMul;
-nonterminal ConstDeclAny ConstDeclAny;
-nonterminal ConstDecl ConstDecl; 
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
+	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
+	ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
 
 nonterminal ClassDecl ClassDecl;
 nonterminal ClassMethodDeclList ClassMethodDeclList;
@@ -166,15 +161,15 @@ VarDeclBase ::= (VarDecl) IDENT:varName {: RESULT=new VarDecl(varName); RESULT.s
 VarDeclListOpt ::= (VarDeclarationListOpt) VarDeclList:V1 {: RESULT=new VarDeclarationListOpt(V1); RESULT.setLine(V1left); :}
 					| (NoVarDeclList) {: RESULT=new NoVarDeclList(); :};
 
-ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_ASSIGN CHAR_CONST:C1 {: RESULT=new ConstDeclarationChar(cName, C1); RESULT.setLine(cNameleft); :};
+ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_ASSIGN CHAR_CONST:cVal {: RESULT=new ConstDeclarationChar(cName, cVal); RESULT.setLine(cNameleft); :};
 ConstDeclCharMul ::= (ConstDeclarationCharMul) ConstDeclCharMul:C1 OP_COMMA ConstDeclChar:C2 {: RESULT=new ConstDeclarationCharMul(C1, C2); RESULT.setLine(C1left); :}
 					| (NoConstDeclCharMul) {: RESULT=new NoConstDeclCharMul(); :};
 
-ConstDeclNum ::= (ConstDeclarationNum) IDENT:cName OP_ASSIGN NUM_CONST:N1 {: RESULT=new ConstDeclarationNum(cName, N1); RESULT.setLine(cNameleft); :};
+ConstDeclNum ::= (ConstDeclarationNum) IDENT:cName OP_ASSIGN NUM_CONST:cVal {: RESULT=new ConstDeclarationNum(cName, cVal); RESULT.setLine(cNameleft); :};
 ConstDeclNumMul ::= (ConstDeclarationNumMul) ConstDeclNumMul:C1 OP_COMMA ConstDeclNum:C2 {: RESULT=new ConstDeclarationNumMul(C1, C2); RESULT.setLine(C1left); :}
 					| (NoConstDeclNumMul) {: RESULT=new NoConstDeclNumMul(); :};
 					
-ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_ASSIGN BOOL_CONST:B1 {: RESULT=new ConstDeclarationBool(cName, B1); RESULT.setLine(cNameleft); :};
+ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_ASSIGN BOOL_CONST:cVal {: RESULT=new ConstDeclarationBool(cName, cVal); RESULT.setLine(cNameleft); :};
 ConstDeclBoolMul ::= (ConstDeclarationBoolMul) ConstDeclBoolMul:C1 OP_COMMA ConstDeclBool:C2 {: RESULT=new ConstDeclarationBoolMul(C1, C2); RESULT.setLine(C1left); :}
 					| (NoConstDeclBoolMul) {: RESULT=new NoConstDeclBoolMul(); :};
 					
