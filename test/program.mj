@@ -2,6 +2,30 @@ program MJProgram
 	int x; 
 	const int y = 5;
 	int a[];
+	
+	abstract class Tab {
+    int size;
+	{
+	
+	    abstract int getp(int i);
+	
+	    abstract int getn(int i);
+	
+	    int getSize() {
+	        return size;
+	    }
+	}}
+	
+	class Table extends Tab {
+    int pos[], neg[];
+	{
+
+	    void putp(int a, int idx) {
+	        this.pos[idx] = a;
+	    }
+    }
+    }
+    
 {
 
 	void b(int m, bool b[], char n) bool p; {

@@ -94,7 +94,13 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar,
 	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
 	ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
 
-nonterminal ClassDecl, ClassMethodDeclList, AbsClassDecl, AbsClassMethodDeclList, AnyMethodDeclList, ExtendDecl, AbsMethodDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj 
+	ClassDecl, AbsClassDecl;
+	
+nonterminal rs.etf.pp1.symboltable.concepts.Obj 	
+	CName, ACName;
+
+nonterminal ClassMethodDeclList, AbsClassMethodDeclList, AnyMethodDeclList, ExtendDecl, AbsMethodDecl;
 nonterminal VarDeclListMul;
 
 precedence left ELSE;
@@ -152,13 +158,16 @@ ConstDecl ::= (ConstDeclrChar) CONST Type:varType ConstDeclChar ConstDeclCharMul
 			| (ConstDeclrNum) CONST Type:varType ConstDeclNum ConstDeclNumMul OP_SEMICOLON
 			| (ConstDeclrBool) CONST Type:varType ConstDeclBool ConstDeclBoolMul OP_SEMICOLON;
 
-ClassDecl ::= (ClassDeclaration) CLASS IDENT:ClassName ExtendDecl OP_LEFT_BRACE
+CName ::= (ClassName) IDENT:cName;
+ACName ::= (AbsClassName) IDENT:cName;
+
+ClassDecl ::= (ClassDeclaration) CLASS CName:ClassName ExtendDecl OP_LEFT_BRACE
 				VarDeclList ClassMethodDeclList	OP_RIGHT_BRACE;
 				
 ClassMethodDeclList ::= (ClassMethodList) OP_LEFT_BRACE MethodDeclList OP_RIGHT_BRACE
 				| (NoClassMethodList);
 				
-AbsClassDecl ::= (AbsClass) ABSTRACT CLASS IDENT:ClassName ExtendDecl 
+AbsClassDecl ::= (AbsClass) ABSTRACT CLASS ACName:ClassName ExtendDecl 
 				OP_LEFT_BRACE VarDeclList AbsClassMethodDeclList
 				OP_RIGHT_BRACE;
 					

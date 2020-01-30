@@ -114,9 +114,13 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar,
 	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
 	ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
 
-nonterminal ClassDecl ClassDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj 
+	ClassDecl, AbsClassDecl;
+	
+nonterminal rs.etf.pp1.symboltable.concepts.Obj 	
+	CName, ACName;
+
 nonterminal ClassMethodDeclList ClassMethodDeclList;
-nonterminal AbsClassDecl AbsClassDecl;
 nonterminal AbsClassMethodDeclList AbsClassMethodDeclList;
 nonterminal AnyMethodDeclList AnyMethodDeclList;
 nonterminal ExtendDecl ExtendDecl;
@@ -178,13 +182,16 @@ ConstDecl ::= (ConstDeclrChar) CONST Type:varType ConstDeclChar:C1 ConstDeclChar
 			| (ConstDeclrNum) CONST Type:varType ConstDeclNum:C1 ConstDeclNumMul:C2 OP_SEMICOLON {: RESULT=new ConstDeclrNum(varType, C1, C2); RESULT.setLine(varTypeleft); :}
 			| (ConstDeclrBool) CONST Type:varType ConstDeclBool:C1 ConstDeclBoolMul:C2 OP_SEMICOLON {: RESULT=new ConstDeclrBool(varType, C1, C2); RESULT.setLine(varTypeleft); :};
 
-ClassDecl ::= (ClassDeclaration) CLASS IDENT:ClassName ExtendDecl:E1 OP_LEFT_BRACE
+CName ::= (ClassName) IDENT:cName {: RESULT=new ClassName(cName); RESULT.setLine(cNameleft); :};
+ACName ::= (AbsClassName) IDENT:cName {: RESULT=new AbsClassName(cName); RESULT.setLine(cNameleft); :};
+
+ClassDecl ::= (ClassDeclaration) CLASS CName:ClassName ExtendDecl:E1 OP_LEFT_BRACE
 				VarDeclList:V2 ClassMethodDeclList:C3	OP_RIGHT_BRACE {: RESULT=new ClassDeclaration(ClassName, E1, V2, C3); RESULT.setLine(ClassNameleft); :};
 				
 ClassMethodDeclList ::= (ClassMethodList) OP_LEFT_BRACE MethodDeclList:M1 OP_RIGHT_BRACE {: RESULT=new ClassMethodList(M1); RESULT.setLine(M1left); :}
 				| (NoClassMethodList) {: RESULT=new NoClassMethodList(); :};
 				
-AbsClassDecl ::= (AbsClass) ABSTRACT CLASS IDENT:ClassName ExtendDecl:E1 
+AbsClassDecl ::= (AbsClass) ABSTRACT CLASS ACName:ClassName ExtendDecl:E1 
 				OP_LEFT_BRACE VarDeclList:V2 AbsClassMethodDeclList:A3
 				OP_RIGHT_BRACE {: RESULT=new AbsClass(ClassName, E1, V2, A3); RESULT.setLine(ClassNameleft); :};
 					

@@ -11,14 +11,11 @@ public class SemanticPass extends VisitorAdaptor {
 	Logger log = Logger.getLogger(getClass());
 	int varDeclCount = 0;
 	Obj method = null;
+	Obj classDeclaration = null;
 	int printCallCount = 0;
 	
 	public int getPrintCallCount() {
 		return printCallCount;
-	}
-	
-	public void visit(VarDeclList varDeclList) {
-		
 	}
 	
 	public SemanticPass() {
@@ -48,7 +45,13 @@ public class SemanticPass extends VisitorAdaptor {
 				parent = parent.getParent());
 
 		declList = (VarDeclList) parent;
-		Obj varObj = Tab.insert(Obj.Var, varDecl.getVarName(), declList.getType().struct);
+
+		if(method == null) {
+			Tab.insert(Obj.Fld, varDecl.getVarName(), declList.getType().struct);
+		}
+		else {
+			Tab.insert(Obj.Var, varDecl.getVarName(), declList.getType().struct);
+		}
 	}
 	
 	public void visit(VarDeclArr varDeclArr) {
@@ -60,7 +63,12 @@ public class SemanticPass extends VisitorAdaptor {
 
 		declList = (VarDeclList) parent;
 		Struct arrayType = new Struct(Struct.Array, declList.getType().struct);
-		Obj varObj = Tab.insert(Obj.Var, varDeclArr.getVarName(), arrayType);
+		if(method == null) {
+			Tab.insert(Obj.Fld, varDeclArr.getVarName(), arrayType);
+		}
+		else {
+			Tab.insert(Obj.Var, varDeclArr.getVarName(), arrayType);
+		}
 	}
 	
 	public void visit(ConstDeclarationChar constChar) {
@@ -108,19 +116,35 @@ public class SemanticPass extends VisitorAdaptor {
 				methodTypeName.getType().struct);
 		Tab.openScope();
 		method.setLevel(0);
+		if(classDeclaration != null) {
+			Obj varObj = Tab.insert(Obj.Var, "this",
+					classDeclaration.getType());
+			varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
+		}
 	}
 	
 	public void visit(VoidMethodTypeName methodTypeName) {
 		methodTypeName.obj = method = Tab.insert(Obj.Meth, methodTypeName.getMethName(), 
 				Tab.noType);
 		Tab.openScope();
+		if(classDeclaration != null) {
+			Obj varObj = Tab.insert(Obj.Var, "this",
+					classDeclaration.getType());
+			varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
+		}
 		method.setLevel(0);
 	}
 	
 	
 	public void visit(MethodDeclaration methodDecl) {
     	Tab.chainLocalSymbols(methodDecl.getMethodTypeName().obj);
-    	log.info(methodDecl.getMethodTypeName().obj.toString());
+    	Tab.closeScope();
+    	
+    	method = null;
+	}
+	
+	public void visit(AbsMethodDecl methodDecl) {
+    	Tab.chainLocalSymbols(methodDecl.getMethodTypeName().obj);
     	Tab.closeScope();
     	
     	method = null;
@@ -138,6 +162,32 @@ public class SemanticPass extends VisitorAdaptor {
 		Obj varObj = Tab.insert(Obj.Var, formalParamArr.getParamId(), 
 				arrayType);
 		varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
+	}
+	
+	public void visit(ClassName className) {
+        className.obj = classDeclaration = Tab.insert(Obj.Type, className.getCName(), 
+        		new Struct(Struct.Class));
+        Tab.openScope();
+	}
+	
+	public void visit(ClassDeclaration classDecl) {
+		Tab.chainLocalSymbols(classDeclaration.getType());
+		Tab.closeScope();
+		
+		classDeclaration = null;
+	}
+	
+	public void visit(AbsClassName className) {
+        className.obj = classDeclaration = Tab.insert(Obj.Type, className.getCName(), 
+        		new Struct(Struct.Class));
+        Tab.openScope();
+	}
+	
+	public void visit(AbsClass classDecl) {
+		Tab.chainLocalSymbols(classDeclaration.getType());
+		Tab.closeScope();
+		
+		classDeclaration = null;
 	}
 		
     public void visit(ProgName progName) { 
