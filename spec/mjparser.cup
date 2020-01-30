@@ -75,7 +75,7 @@ terminal String IDENT ;
 terminal IF, ELSE;
 
 nonterminal MethodDeclList, DeclList;
-nonterminal FormalParamList, FormalParamDecl, FormPars, ActPars, ActualParamList, ForStmt, Addop, Mulop, Relop; 
+nonterminal FormalParamList, FormalParamDecl, FormParams, ActPars, ActualParamList, ForStmt, Addop, Mulop, Relop; 
 nonterminal StatementList, Statement,
 DesignatorStmt, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
@@ -183,27 +183,27 @@ AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList MethodDecl
 					(NoAnyMethodDecl);
 
 MethodDecl ::= (MethodDeclaration) MethodTypeName:typeName
-			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN VarDeclListMul OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
+			   OP_LEFT_PAREN FormParams OP_RIGHT_PAREN VarDeclListMul OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
 			   	|		 (MethodDeclError) error {: parser.report_error_on_err_token("Error in method decl declaration"); :}
 			   ;
 			   
 AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName:typeName
-			   OP_LEFT_PAREN FormPars OP_RIGHT_PAREN OP_SEMICOLON;
+			   OP_LEFT_PAREN FormParams OP_RIGHT_PAREN OP_SEMICOLON;
 
 MethodTypeName ::= (TypeMethodTypeName) Type:retType IDENT:methName
 					| (VoidMethodTypeName) VOID:retType IDENT:methName
 ;
 
-FormPars ::= (FormParams) FormalParamList | (NoFormParam) /* epsilon */ ;
+FormParams ::= (FormalParams) FormalParamList | (NoFormParam) /* epsilon */ ;
 
 FormalParamList ::= (FormalParamDecls) FormalParamList OP_COMMA FormalParamDecl
 					|
 					(SingleFormalParamDecl) FormalParamDecl
 					;
 					
-FormalParamDecl ::= (FormalParamSingle) Type IDENT
+FormalParamDecl ::= (FormalParamVar) Type:paramType IDENT:paramId
     |
-    (FormalParamArray) Type IDENT OP_LEFT_SQUARE OP_RIGHT_SQUARE
+    (FormalParamArr) Type:paramType IDENT:paramId OP_LEFT_SQUARE OP_RIGHT_SQUARE
     |
     (FormalParamError) error {: parser.report_error_on_err_token("Error in formal param declaration"); :}
     ;

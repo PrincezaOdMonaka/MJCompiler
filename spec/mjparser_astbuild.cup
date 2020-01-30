@@ -78,7 +78,7 @@ nonterminal MethodDeclList MethodDeclList;
 nonterminal DeclList DeclList;
 nonterminal FormalParamList FormalParamList;
 nonterminal FormalParamDecl FormalParamDecl;
-nonterminal FormPars FormPars;
+nonterminal FormParams FormParams;
 nonterminal ActPars ActPars;
 nonterminal ActualParamList ActualParamList;
 nonterminal ForStmt ForStmt;
@@ -209,27 +209,27 @@ AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList:A1 MethodDecl:M2
 					(NoAnyMethodDecl) {: RESULT=new NoAnyMethodDecl(); :};
 
 MethodDecl ::= (MethodDeclaration) MethodTypeName:typeName
-			   OP_LEFT_PAREN FormPars:F1 OP_RIGHT_PAREN VarDeclListMul:V2 OP_LEFT_BRACE StatementList:S3 OP_RIGHT_BRACE {: RESULT=new MethodDeclaration(typeName, F1, V2, S3); RESULT.setLine(typeNameleft); :} 
+			   OP_LEFT_PAREN FormParams:F1 OP_RIGHT_PAREN VarDeclListMul:V2 OP_LEFT_BRACE StatementList:S3 OP_RIGHT_BRACE {: RESULT=new MethodDeclaration(typeName, F1, V2, S3); RESULT.setLine(typeNameleft); :} 
 			   	|		 (MethodDeclError) error {: parser.report_error_on_err_token("Error in method decl declaration"); :} {: RESULT=new MethodDeclError(); :}
 			   ;
 			   
 AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName:typeName
-			   OP_LEFT_PAREN FormPars:F1 OP_RIGHT_PAREN OP_SEMICOLON {: RESULT=new AbsMethodDecl(typeName, F1); RESULT.setLine(typeNameleft); :};
+			   OP_LEFT_PAREN FormParams:F1 OP_RIGHT_PAREN OP_SEMICOLON {: RESULT=new AbsMethodDecl(typeName, F1); RESULT.setLine(typeNameleft); :};
 
 MethodTypeName ::= (TypeMethodTypeName) Type:retType IDENT:methName {: RESULT=new TypeMethodTypeName(retType, methName); RESULT.setLine(retTypeleft); :}
 					| (VoidMethodTypeName) VOID:retType IDENT:methName {: RESULT=new VoidMethodTypeName(methName); RESULT.setLine(methNameleft); :}
 ;
 
-FormPars ::= (FormParams) FormalParamList:F1 {: RESULT=new FormParams(F1); RESULT.setLine(F1left); :} | (NoFormParam) {: RESULT=new NoFormParam(); :} /* epsilon */ ;
+FormParams ::= (FormalParams) FormalParamList:F1 {: RESULT=new FormalParams(F1); RESULT.setLine(F1left); :} | (NoFormParam) {: RESULT=new NoFormParam(); :} /* epsilon */ ;
 
 FormalParamList ::= (FormalParamDecls) FormalParamList:F1 OP_COMMA FormalParamDecl:F2 {: RESULT=new FormalParamDecls(F1, F2); RESULT.setLine(F1left); :}
 					|
 					(SingleFormalParamDecl) FormalParamDecl:F1 {: RESULT=new SingleFormalParamDecl(F1); RESULT.setLine(F1left); :}
 					;
 					
-FormalParamDecl ::= (FormalParamSingle) Type:T1 IDENT:I2 {: RESULT=new FormalParamSingle(T1, I2); RESULT.setLine(T1left); :}
+FormalParamDecl ::= (FormalParamVar) Type:paramType IDENT:paramId {: RESULT=new FormalParamVar(paramType, paramId); RESULT.setLine(paramTypeleft); :}
     |
-    (FormalParamArray) Type:T1 IDENT:I2 OP_LEFT_SQUARE OP_RIGHT_SQUARE {: RESULT=new FormalParamArray(T1, I2); RESULT.setLine(T1left); :}
+    (FormalParamArr) Type:paramType IDENT:paramId OP_LEFT_SQUARE OP_RIGHT_SQUARE {: RESULT=new FormalParamArr(paramType, paramId); RESULT.setLine(paramTypeleft); :}
     |
     (FormalParamError) error {: parser.report_error_on_err_token("Error in formal param declaration"); :} {: RESULT=new FormalParamError(); :}
     ;

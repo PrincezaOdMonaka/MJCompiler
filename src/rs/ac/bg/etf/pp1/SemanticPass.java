@@ -108,7 +108,6 @@ public class SemanticPass extends VisitorAdaptor {
 				methodTypeName.getType().struct);
 		Tab.openScope();
 		method.setLevel(0);
-		method.setFpPos(0);
 	}
 	
 	public void visit(VoidMethodTypeName methodTypeName) {
@@ -116,7 +115,6 @@ public class SemanticPass extends VisitorAdaptor {
 				Tab.noType);
 		Tab.openScope();
 		method.setLevel(0);
-		method.setFpPos(0);
 	}
 	
 	
@@ -128,6 +126,20 @@ public class SemanticPass extends VisitorAdaptor {
     	method = null;
 	}
 	
+	public void visit(FormalParamVar formalParamVar) {
+		Obj varObj = Tab.insert(Obj.Var, formalParamVar.getParamId(), 
+				formalParamVar.getType().struct);
+		varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
+	}
+	
+	public void visit(FormalParamArr formalParamArr) {
+		Struct arrayType = new Struct(Struct.Array, 
+				formalParamArr.getType().struct);
+		Obj varObj = Tab.insert(Obj.Var, formalParamArr.getParamId(), 
+				arrayType);
+		varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
+	}
+		
     public void visit(ProgName progName) { 
     	progName.obj = Tab.insert(Obj.Prog, progName.getPName(), Tab.noType);
     	Tab.openScope();

@@ -4,7 +4,7 @@ program MJProgram
 	int a[];
 {
 
-	void b(int m, char n) bool p; {
+	void b(int m, bool b[], char n) bool p; {
 		return;
 	}
 	
