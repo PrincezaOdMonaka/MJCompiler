@@ -2,10 +2,13 @@ program MJProgram
 	int x; 
 	const int y = 5;
 	int a[];
+	int d[];
 	char abc;
 	class Cl {
     	int pos[], neg[];
-	{}}
+	{
+		void q(int a) {}
+	}}
 	Cl cclass;
 {
 
@@ -21,16 +24,16 @@ program MJProgram
 	void main() {
 		x = y + 2;
 		y = k() + 3;
-		if(a > y)
-			b(k(), abc, b);
+		if(x > y)
+			b(k(), abc, a);
 		y();
 
 		a = new int[x];
 
+		d = a;
 
 		x++;
 		y--;
-
 		print(y);
 		return 0;
 	}

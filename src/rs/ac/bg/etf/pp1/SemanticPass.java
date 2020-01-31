@@ -257,7 +257,11 @@ public class SemanticPass extends VisitorAdaptor {
 				) {
 			if(parent instanceof DesignatorStatementFcall) {
 //				log.info("DSF"+((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());
-				method = findVisibleSymbol(((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());	
+				if(((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec() instanceof DesignatorMember) {
+					method = findVisibleSymbol(((DesignatorMember)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());	
+				} else {
+					method = findVisibleSymbol(((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());	
+				}
 				break;
 			}
 			else if(parent instanceof FactorFuncCall) {
@@ -274,15 +278,19 @@ public class SemanticPass extends VisitorAdaptor {
 			if(actualParams.getActualParamList() instanceof ActualParams) {
 				params = (ActualParams)actualParams.getActualParamList();
 			}
-			else {
+		 	else {
 				param = (ActualParam)actualParams.getActualParamList();
 			}
 			Obj arg;
 			Object[] locals = method.getLocalSymbols().toArray();
-			for(int i=locals.length - 1; i >= 0; i--) {
+			int limit = 0;
+			if(classMethod(actualParams)) limit = 1;
+			for(int i=locals.length - 1; i >= limit; i--) {
 				if((arg=(Obj)(locals[i])).getFpPos()==-1) continue;
 				
 				if(params!=null){
+//					log.info(arg.getType().getKind()+"");
+//					log.info(params.getExpr().struct.getKind()+"");
 					if(compatibleTypes(arg.getType(), params.getExpr().struct)) {
 						log.info("paramsok");
 					} else 
@@ -312,6 +320,15 @@ public class SemanticPass extends VisitorAdaptor {
 			}
 		}
 	}
+		
+	boolean classMethod(SyntaxNode method) {
+		SyntaxNode parent = method.getParent();
+		while(parent!=null &&
+				!(parent instanceof Designator) &&
+				!(parent instanceof DesignatorMember))
+			parent = parent.getParent();
+		return parent instanceof DesignatorMember;
+	}
 	
 	public void visit(CondFactSimple condFact) {
 		if(condFact.getExpr().struct != Tab.find("bool").getType()) {
@@ -322,7 +339,7 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(CondFactRelop condFact) {
 		if(!compatibleTypes(condFact.getExpr().struct, 
 				condFact.getExpr1().struct)) {
-			log.info("Condition types incompatible");
+			log.info("Condition types incompatible on line "+condFact.getLine());
 		}
 	}
 	
