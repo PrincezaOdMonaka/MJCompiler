@@ -75,19 +75,21 @@ terminal String IDENT ;
 terminal IF, ELSE;
 
 nonterminal MethodDeclList, DeclList;
-nonterminal FormalParamList, FormalParamDecl, FormParams, ActPars, ActualParamList, ForStmt, Addop, Mulop, Relop; 
-nonterminal StatementList, Statement,
-DesignatorStmt, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
+nonterminal FormalParamList, FormalParamDecl, FormParams, ActualParamList, ForStmt, Addop, Mulop, Relop; 
+nonterminal StatementList, Statement, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
 
-nonterminal Designator, VarDeclBase;
+nonterminal VarDeclBase;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, 
-      MethodDecl, MethodTypeName;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj 
+	  Program, ProgName, 
+      MethodDecl, MethodTypeName, 
+      Designator,DesignatorSpec, 
+      DesignatorStmt, ActPars;
 
 nonterminal VarDeclList, VarDeclMul, VarDeclListOpt;
 nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
@@ -247,12 +249,14 @@ OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList OP_RIGHT_BR
 						(OneStatement) Statement;
 
 
-Designator ::= (DesignatorBase) IDENT:name
-			 | (DesignatorMember) Designator OP_DOT IDENT:member	
-			 | (DesignatorIndex) Designator OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
+DesignatorSpec ::= (DesignatorBase) IDENT:name
+			 | (DesignatorMember) Designator OP_DOT IDENT:name	
+			 | (DesignatorIndex) Designator:arrName OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
 			 |
 			 (DesignatorErr) error {: parser.report_error_on_err_token("Error in designator declaration"); :}
 ;
+
+Designator ::= (Designator) DesignatorSpec;
 
 DesignatorStmt ::= (DesignatorStatementAssign) Designator OP_ASSIGN Expr
 				| (DesignatorStatementFcall) Designator OP_LEFT_PAREN ActPars OP_RIGHT_PAREN

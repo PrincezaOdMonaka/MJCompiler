@@ -42,7 +42,7 @@ public class MJParserTestParserOnly {
 			MJParser p = new MJParser(lexer);
 	        Symbol s = p.parse();  //pocetak parsiranja
 	        Program prog = (Program)(s.value);
-	        log.info(prog.toString(""));
+//	        log.info(prog.toString(""));
 			Tab.init(); // Universe scope
 //			SemanticPass semanticCheck = new SemanticPass();
 //			prog.traverseBottomUp(semanticCheck);

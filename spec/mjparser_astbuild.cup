@@ -79,7 +79,6 @@ nonterminal DeclList DeclList;
 nonterminal FormalParamList FormalParamList;
 nonterminal FormalParamDecl FormalParamDecl;
 nonterminal FormParams FormParams;
-nonterminal ActPars ActPars;
 nonterminal ActualParamList ActualParamList;
 nonterminal ForStmt ForStmt;
 nonterminal Addop Addop;
@@ -87,8 +86,6 @@ nonterminal Mulop Mulop;
 nonterminal Relop Relop; 
 nonterminal StatementList StatementList;
 nonterminal Statement Statement;
-nonterminal
-DesignatorStmt DesignatorStmt;
 nonterminal DesignatorStmtOpt DesignatorStmtOpt;
 nonterminal CondStatementOpt CondStatementOpt;
 nonterminal OneOrBlockStatement OneOrBlockStatement;
@@ -97,15 +94,17 @@ nonterminal CondTerm CondTerm;
 nonterminal CondFact CondFact;
 nonterminal ElseStatement ElseStatement;
 
-nonterminal Designator Designator;
 nonterminal VarDeclBase VarDeclBase;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Factor;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, 
-      MethodDecl, MethodTypeName;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj 
+	  Program, ProgName, 
+      MethodDecl, MethodTypeName, 
+      Designator,DesignatorSpec, 
+      DesignatorStmt, ActPars;
 
 nonterminal VarDeclList VarDeclList;
 nonterminal VarDeclMul VarDeclMul;
@@ -271,12 +270,14 @@ OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList:S1 OP_RIGHT
 						(OneStatement) Statement:S1 {: RESULT=new OneStatement(S1); RESULT.setLine(S1left); :};
 
 
-Designator ::= (DesignatorBase) IDENT:name {: RESULT=new DesignatorBase(name); RESULT.setLine(nameleft); :}
-			 | (DesignatorMember) Designator:D1 OP_DOT IDENT:member {: RESULT=new DesignatorMember(D1, member); RESULT.setLine(D1left); :}	
-			 | (DesignatorIndex) Designator:D1 OP_LEFT_SQUARE Expr:E2 OP_RIGHT_SQUARE {: RESULT=new DesignatorIndex(D1, E2); RESULT.setLine(D1left); :}	
+DesignatorSpec ::= (DesignatorBase) IDENT:name {: RESULT=new DesignatorBase(name); RESULT.setLine(nameleft); :}
+			 | (DesignatorMember) Designator:D1 OP_DOT IDENT:name {: RESULT=new DesignatorMember(D1, name); RESULT.setLine(D1left); :}	
+			 | (DesignatorIndex) Designator:arrName OP_LEFT_SQUARE Expr:E1 OP_RIGHT_SQUARE {: RESULT=new DesignatorIndex(arrName, E1); RESULT.setLine(arrNameleft); :}	
 			 |
 			 (DesignatorErr) error {: parser.report_error_on_err_token("Error in designator declaration"); :} {: RESULT=new DesignatorErr(); :}
 ;
+
+Designator ::= (Designator) DesignatorSpec:D1 {: RESULT=new Designator(D1); RESULT.setLine(D1left); :};
 
 DesignatorStmt ::= (DesignatorStatementAssign) Designator:D1 OP_ASSIGN Expr:E2 {: RESULT=new DesignatorStatementAssign(D1, E2); RESULT.setLine(D1left); :}
 				| (DesignatorStatementFcall) Designator:D1 OP_LEFT_PAREN ActPars:A2 OP_RIGHT_PAREN {: RESULT=new DesignatorStatementFcall(D1, A2); RESULT.setLine(D1left); :}
