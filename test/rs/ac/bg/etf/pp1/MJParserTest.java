@@ -49,7 +49,8 @@ public class MJParserTest {
 			SemanticPass semanticCheck = new SemanticPass();
 			prog.traverseBottomUp(semanticCheck);
 			
-	        log.info("Print calls = " + semanticCheck.printCallCount);
+	        log.info("Print calls = " + semanticCheck.printCallCount
+	        		+ ", Var count = " + semanticCheck.varDeclCount);
 	        if(!semanticCheck.passed())
 	        	log.info(semanticCheck.errorMessage);
 	        if (!p.errorDetected && semanticCheck.passed()) {

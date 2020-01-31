@@ -91,10 +91,10 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj
       Designator,DesignatorSpec, 
       DesignatorStmt, ActPars;
 
-nonterminal VarDeclList, VarDeclMul, VarDeclListOpt;
+nonterminal VarDeclList, VarDeclMul;
 nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
 	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
-	ConstDeclBool, ConstDeclBoolMul, ConstDeclAny, ConstDecl; 
+	ConstDeclBool, ConstDeclBoolMul, ConstDecl; 
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj 
 	ClassDecl, AbsClassDecl;
@@ -139,9 +139,6 @@ VarDeclBase ::= (VarDecl) IDENT:varName
 				(VarDeclArr) IDENT:varName OP_LEFT_SQUARE OP_RIGHT_SQUARE
 ;
 
-VarDeclListOpt ::= (VarDeclarationListOpt) VarDeclList
-					| (NoVarDeclList);
-
 ConstDeclChar ::= (ConstDeclarationChar) IDENT:cName OP_ASSIGN CHAR_CONST:cVal;
 ConstDeclCharMul ::= (ConstDeclarationCharMul) ConstDeclCharMul OP_COMMA ConstDeclChar
 					| (NoConstDeclCharMul);
@@ -154,8 +151,6 @@ ConstDeclBool ::= (ConstDeclarationBool) IDENT:cName OP_ASSIGN BOOL_CONST:cVal;
 ConstDeclBoolMul ::= (ConstDeclarationBoolMul) ConstDeclBoolMul OP_COMMA ConstDeclBool
 					| (NoConstDeclBoolMul);
 					
-ConstDeclAny ::= (ConstDeclAnyBool) ConstDeclBool | (ConstDeclAnyNum) ConstDeclNum | (ConstDeclAnyChar) ConstDeclChar;
-
 ConstDecl ::= (ConstDeclrChar) CONST Type:varType ConstDeclChar ConstDeclCharMul OP_SEMICOLON
 			| (ConstDeclrNum) CONST Type:varType ConstDeclNum ConstDeclNumMul OP_SEMICOLON
 			| (ConstDeclrBool) CONST Type:varType ConstDeclBool ConstDeclBoolMul OP_SEMICOLON;
@@ -195,7 +190,7 @@ AnyMethodDeclList ::= (AnyMethodDeclarations) AnyMethodDeclList MethodDecl
 
 MethodDecl ::= (MethodDeclaration) MethodTypeName:typeName
 			   OP_LEFT_PAREN FormParams OP_RIGHT_PAREN VarDeclListMul OP_LEFT_BRACE StatementList OP_RIGHT_BRACE 
-			   	|		 (MethodDeclError) error {: parser.report_error_on_err_token("Error in method decl declaration"); :}
+			   	|		 (MethodDeclError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in method decl declaration"); :}
 			   ;
 			   
 AbsMethodDecl ::= (AbsMethodDecl) ABSTRACT MethodTypeName:typeName
@@ -216,7 +211,7 @@ FormalParamDecl ::= (FormalParamVar) Type:paramType IDENT:paramId
     |
     (FormalParamArr) Type:paramType IDENT:paramId OP_LEFT_SQUARE OP_RIGHT_SQUARE
     |
-    (FormalParamError) error {: parser.report_error_on_err_token("Error in formal param declaration"); :}
+    (FormalParamError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in formal param declaration"); :}
     ;
 
 StatementList ::= (Statements) StatementList Statement 
@@ -242,7 +237,7 @@ Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 			  |
 		      (ReadStatement) READ OP_LEFT_PAREN Designator OP_RIGHT_PAREN OP_SEMICOLON
 		          |
-			 (StatementError) error {: parser.report_error_on_err_token("Error in statement declaration"); :}
+			 (StatementError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in statement declaration"); :}
 ;
 
 OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList OP_RIGHT_BRACE |
@@ -253,7 +248,7 @@ DesignatorSpec ::= (DesignatorBase) IDENT:name
 			 | (DesignatorMember) Designator OP_DOT IDENT:name	
 			 | (DesignatorIndex) Designator:arrName OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
 			 |
-			 (DesignatorErr) error {: parser.report_error_on_err_token("Error in designator declaration"); :}
+			 (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :}
 ;
 
 Designator ::= (Designator) DesignatorSpec;
@@ -262,7 +257,7 @@ DesignatorStmt ::= (DesignatorStatementAssign) Designator OP_ASSIGN Expr
 				| (DesignatorStatementFcall) Designator OP_LEFT_PAREN ActPars OP_RIGHT_PAREN
 				| (DesignatorStmtPostinc) Designator OP_PLUSPLUS
 				| (DesignatorStmtPostdec) Designator OP_MINUSMINUS
-				| 			 (DesignatorStmtErr) error {: parser.report_error_on_err_token("Error in designator stmt declaration"); :}
+				| 			 (DesignatorStmtErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator stmt declaration"); :}
 
 ;
 
@@ -333,7 +328,7 @@ ForStmt ::= (ForStmtOne) FOR OP_LEFT_PAREN DesignatorStmtOpt OP_SEMICOLON
 					OneOrBlockStatement;
 
 Addop ::= (Addopr) OP_PLUS | (Subopr) OP_MINUS     |
-    (AddopError) error {: parser.report_error_on_err_token("Error in addop declaration"); :}
+    (AddopError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in addop declaration"); :}
     ;
 Mulop ::= (Mulopr) OP_MUL | (Divopr) OP_DIV | (Modopr) OP_MOD;
 
