@@ -26,12 +26,10 @@ program MJProgram
 		y = k() + 3;
 		if(x > y)
 			b(k(), abc, a);
-		y();
 
 		a = new int[x];
 
 		d = a;
-
 		x++;
 		y--;
 		print(y);

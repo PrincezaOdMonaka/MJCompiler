@@ -15,6 +15,8 @@ public class SemanticPass extends VisitorAdaptor {
 	Obj method = null;
 	Obj classDeclaration = null;
 	int printCallCount = 0;
+	boolean errorsFound = false;
+	StringBuilder errorMessage = new StringBuilder("Semantic check errors found.\n");
 	
 	public int getPrintCallCount() {
 		return printCallCount;
@@ -24,14 +26,19 @@ public class SemanticPass extends VisitorAdaptor {
         Tab.insert(Obj.Type, "bool", new Struct(Struct.Bool));
 	}
 	
+	public void reportError(String message, SyntaxNode node) {
+		errorsFound = true;
+		errorMessage.append(message + " on line "+node.getLine()+"\n");
+	}
+	
     public void visit(Type type){
         Obj typeObj = Tab.find(type.getTypeName());
         if(typeObj == Tab.noObj){
-            log.info("Cannot find type: " + type.getTypeName() + type);
+            reportError("Cannot find type: " + type.getTypeName() + type, type);
         }
         else{
             if(typeObj.getKind() != Obj.Type){
-            	log.info("Type name " + type.getTypeName() + " is not a type." + type);
+            	reportError("Type name " + type.getTypeName() + " is not a type. Error " + type, type);
             }
             else{
                 type.struct = typeObj.getType();
@@ -43,7 +50,7 @@ public class SemanticPass extends VisitorAdaptor {
 		VarDeclList declList;
 		SyntaxNode parent;
 		if(findCurrentScope(varDecl.getVarName())!=null) {
-			log.info("Symbol with name " + varDecl.getVarName() + " already exists.");
+			reportError("Symbol with name " + varDecl.getVarName() + " already exists. Error ", varDecl);
 			return;
 		}
 		for(parent = varDecl.getParent(); 
@@ -54,6 +61,7 @@ public class SemanticPass extends VisitorAdaptor {
 
 		Obj var;
 		if(method == null) {
+			if(classDeclaration==null) varDeclCount++;
 			var = Tab.insert(Obj.Fld, varDecl.getVarName(), declList.getType().struct);
 		}
 		else {
@@ -72,6 +80,7 @@ public class SemanticPass extends VisitorAdaptor {
 		declList = (VarDeclList) parent;
 		Struct arrayType = new Struct(Struct.Array, declList.getType().struct);
 		if(method == null) {
+			if(classDeclaration==null) varDeclCount++;
 			Tab.insert(Obj.Fld, varDeclArr.getVarName(), arrayType);
 		}
 		else {
@@ -83,7 +92,7 @@ public class SemanticPass extends VisitorAdaptor {
 		ConstDeclrChar declList;
 		SyntaxNode parent;
 		if(findCurrentScope(constChar.getCName())!=null) {
-			log.info("Symbol with name " + constChar.getCName() + " already exists.");
+			reportError("Symbol with name " + constChar.getCName() + " already exists. Error ", constChar);
 			return;
 		}
 		for(parent = constChar.getParent(); 
@@ -99,7 +108,7 @@ public class SemanticPass extends VisitorAdaptor {
 		ConstDeclrBool declList;
 		SyntaxNode parent;
 		if(findCurrentScope(constBool.getCName())!=null) {
-			log.info("Symbol with name " + constBool.getCName() + " already exists.");
+			reportError("Symbol with name " + constBool.getCName() + " already exists. Error ", constBool);
 			return;
 		}
 		for(parent = constBool.getParent(); 
@@ -117,7 +126,7 @@ public class SemanticPass extends VisitorAdaptor {
 		ConstDeclrNum declList;
 		SyntaxNode parent;
 		if(findCurrentScope(constNum.getCName())!=null) {
-			log.info("Symbol with name " + constNum.getCName() + " already exists.");
+			reportError("Symbol with name " + constNum.getCName() + " already exists. Error ", constNum);
 			return;
 		}
 		for(parent = constNum.getParent(); 
@@ -163,7 +172,7 @@ public class SemanticPass extends VisitorAdaptor {
     	Tab.closeScope();
     	if(method.getName().equals("main") && 
     			(method.getType()!=Tab.noType || method.getLocalSymbols().size()!=0)) {
-			log.info("Bad definition of main function.");
+    		reportError("Bad definition of main function ", methodDecl);
     	}
     	method = null;
 	}
@@ -177,7 +186,7 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	public void visit(FormalParamVar formalParamVar) {
 		if(findCurrentScope(formalParamVar.getParamId())!=null) {
-			log.info("Symbol with name " + formalParamVar.getParamId() + " already exists.");
+			reportError("Symbol with name " + formalParamVar.getParamId() + " already exists. Error", formalParamVar);
 			return;
 		}
 		Obj varObj = Tab.insert(Obj.Var, formalParamVar.getParamId(), 
@@ -195,7 +204,7 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	public void visit(FactorNewArray factorNewArr) {
 		if(factorNewArr.getExpr().struct != Tab.intType) {
-			log.info("Array size must be int");
+			reportError("Array size must be int. Error ", factorNewArr);
 		}
 		factorNewArr.struct = new Struct(Struct.Array, factorNewArr.getType().struct);
 
@@ -204,7 +213,7 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(FactorNew formalParamArr) {
 		Obj type = Tab.find(formalParamArr.getType().getTypeName());
 		if(type!=null && type.getType().getKind() != Struct.Class) {
-			log.info("Cannot dynamically allocate thing that's not a class");
+			reportError("Cannot dynamically allocate thing that's not a class", formalParamArr);
 		}
 
 		formalParamArr.struct = type.getType();
@@ -294,14 +303,14 @@ public class SemanticPass extends VisitorAdaptor {
 					if(compatibleTypes(arg.getType(), params.getExpr().struct)) {
 						log.info("paramsok");
 					} else 
-						log.info("paramsnotok");
+						reportError("Function parameters invalid on position "+arg.getFpPos(), actualParams);
 					
 					if(params.getActualParamList() instanceof ActualParams) {
 						params = (ActualParams)(params.getActualParamList());
 					}
 					else {
 						if(i!=1) {
-							log.info("Invalid number of args in "+method.getName()+" on line "+actualParams.getLine());
+							reportError("Invalid number of args", actualParams);
 						}
 						param = (ActualParam)(params.getActualParamList());
 						params = null;
@@ -310,13 +319,14 @@ public class SemanticPass extends VisitorAdaptor {
 				else {
 					if(compatibleTypes(arg.getType(), param.getExpr().struct)) {
 						log.info("param1ok");
-					} else log.info("param1notok");
+					} else reportError("Function parameters invalid on position "+arg.getFpPos(), actualParams);
+
 				}
 				
 			}
 			
 			if(param==null) {
-				log.info("Invalid number of args in "+method.getName()+" on line "+actualParams.getLine());
+				reportError("Invalid number of args ", actualParams);
 			}
 		}
 	}
@@ -332,14 +342,14 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	public void visit(CondFactSimple condFact) {
 		if(condFact.getExpr().struct != Tab.find("bool").getType()) {
-			log.info("Condition type invalid");
+			reportError("Condition type invalid", condFact);
 		}
 	}
 	
 	public void visit(CondFactRelop condFact) {
 		if(!compatibleTypes(condFact.getExpr().struct, 
 				condFact.getExpr1().struct)) {
-			log.info("Condition types incompatible on line "+condFact.getLine());
+			reportError("Condition types incompatible",condFact);
 		}
 	}
 	
@@ -366,7 +376,7 @@ public class SemanticPass extends VisitorAdaptor {
 		expr.struct = expr.getTerm().struct;
 		if(expr.struct != Tab.intType)
 		{
-			log.info("Non-int expression can't be negative");
+			reportError("Non-int expression can't be negative", expr);
 		}
 	}
 	
@@ -404,18 +414,22 @@ public class SemanticPass extends VisitorAdaptor {
     				)).getName();
     	}
     	if(name=="") {
-    		log.info("Function not found.");
+    		reportError("Function not found", factor);
     	}
 		factor.getDesignator().obj = findVisibleSymbol(name);
 		if(factor.getDesignator().obj.getKind() != Obj.Meth) {
-			log.info("Trying to invoke symbol that is not a method.");
+			reportError("Trying to invoke symbol that is not a method", factor);
 		}
 		factor.struct = factor.getDesignator().obj.getType();
     }
     
     public void visit(DesignatorStatementFcall designator){
+    	if(designator.getDesignator().obj==null) {
+			reportError("Designator undefined ", designator);
+			return;
+    	}
 		if(designator.getDesignator().obj.getKind() != Obj.Meth) {
-			log.info("Trying to invoke symbol that is not a method.");
+			reportError("Trying to invoke symbol that is not a method", designator);
 		}
         designator.obj = designator.getDesignator().obj;
     }
@@ -423,7 +437,7 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(DesignatorStmtPostinc designator){
 		if(designator.getDesignator().obj.getType().getKind()
 				!= Struct.Int) {
-			log.info("Post increment operator requires int");
+			reportError("Post increment operator requires int", designator);
 		}
         designator.obj = designator.getDesignator().obj;
     }
@@ -431,7 +445,7 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(DesignatorStmtPostdec designator){
 		if(designator.getDesignator().obj.getType().getKind()
 				!= Struct.Int) {
-			log.info("Post decrement operator requires int");
+			reportError("Post decrement operator requires int", designator);
 		}
         designator.obj = designator.getDesignator().obj;
     }
@@ -439,7 +453,7 @@ public class SemanticPass extends VisitorAdaptor {
     public void visit(DesignatorStatementAssign designator) {
     	if(!compatibleTypes(designator.getDesignator().obj.getType(),
     			designator.getExpr().struct)) {
-    		log.info("Incompatible type assignment on line "+designator.getLine());
+    		reportError("Incompatible type assignment",designator);
     	}
     	designator.obj = designator.getDesignator().obj;
     }
@@ -504,9 +518,12 @@ public class SemanticPass extends VisitorAdaptor {
     public void visit(Program program) { 
     	if(findVisibleSymbol("main")==null) {
     		log.info("Main not defined");
+    		errorsFound = true;
     	}
     	Tab.chainLocalSymbols(program.getProgName().obj);
     	Tab.closeScope();
     }
+    
+    boolean passed() { return !errorsFound; }
     
 }
