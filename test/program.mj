@@ -17,7 +17,8 @@ program MJProgram
 	void main() {
 		x = y + 2;
 		y = k() + 3;
-		b(k(), abc, b);
+		if(a > y)
+			b(k(), abc, b);
 		print(y);
 		return 0;
 	}

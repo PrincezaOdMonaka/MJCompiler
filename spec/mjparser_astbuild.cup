@@ -301,7 +301,7 @@ CondTerm ::= (ConditionTerm) CondTerm:C1 OP_AND CondFact:C2 {: RESULT=new Condit
 			| (CondBaseTerm) CondFact:C1 {: RESULT=new CondBaseTerm(C1); RESULT.setLine(C1left); :};
 			
 CondFact ::= (CondFactSimple) Expr:E1 {: RESULT=new CondFactSimple(E1); RESULT.setLine(E1left); :}
-			| (CondFactRelop) Expr:E1 Relop:R2 Expr:E3 {: RESULT=new CondFactRelop(E1, R2, E3); RESULT.setLine(E1left); :};
+			| (CondFactRelop) Expr:lhs Relop:R1 Expr:rhs {: RESULT=new CondFactRelop(lhs, R1, rhs); RESULT.setLine(lhsleft); :};
 			
 CondStatementOpt ::= (CondStmtOpt) CondStatement:C1 {: RESULT=new CondStmtOpt(C1); RESULT.setLine(C1left); :}
 					| (NoCondStmt) {: RESULT=new NoCondStmt(); :}

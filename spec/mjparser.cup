@@ -280,7 +280,7 @@ CondTerm ::= (ConditionTerm) CondTerm OP_AND CondFact
 			| (CondBaseTerm) CondFact;
 			
 CondFact ::= (CondFactSimple) Expr
-			| (CondFactRelop) Expr Relop Expr;
+			| (CondFactRelop) Expr:lhs Relop Expr:rhs;
 			
 CondStatementOpt ::= (CondStmtOpt) CondStatement
 					| (NoCondStmt)

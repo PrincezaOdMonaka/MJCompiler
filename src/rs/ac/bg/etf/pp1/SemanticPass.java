@@ -252,7 +252,6 @@ public class SemanticPass extends VisitorAdaptor {
 		
 //		log.info("METHOD "+(method!=null?method.getName():"null"));
 		
-
 		if(method.getKind()==Obj.Meth) {
 			ActualParams params = null; ActualParam param = null;
 			if(actualParams.getActualParamList() instanceof ActualParams) {
@@ -294,6 +293,19 @@ public class SemanticPass extends VisitorAdaptor {
 			if(param==null) {
 				log.info("Invalid number of args in "+method.getName()+" on line "+actualParams.getLine());
 			}
+		}
+	}
+	
+	public void visit(CondFactSimple condFact) {
+		if(condFact.getExpr().struct != Tab.find("bool").getType()) {
+			log.info("Condition type invalid");
+		}
+	}
+	
+	public void visit(CondFactRelop condFact) {
+		if(!compatibleTypes(condFact.getExpr().struct, 
+				condFact.getExpr1().struct)) {
+			log.info("Condition types incompatible");
 		}
 	}
 	
