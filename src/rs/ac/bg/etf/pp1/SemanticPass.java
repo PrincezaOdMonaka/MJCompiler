@@ -238,18 +238,18 @@ public class SemanticPass extends VisitorAdaptor {
 				parent = parent.getParent()
 				) {
 			if(parent instanceof DesignatorStatementFcall) {
-				log.info("DSF"+((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());
-				method = lookupSymbolInScope(((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());	
+//				log.info("DSF"+((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());
+				method = findVisibleSymbol(((DesignatorBase)((DesignatorStatementFcall)parent).getDesignator().getDesignatorSpec()).getName());	
 				break;
 			}
 			else if(parent instanceof FactorFuncCall) {
-				log.info("FFC"+((DesignatorBase)((FactorFuncCall)parent).getDesignator().getDesignatorSpec()).getName());
-				method = lookupSymbolInScope(((DesignatorBase)((FactorFuncCall)parent).getDesignator().getDesignatorSpec()).getName());	
+//				log.info("FFC"+((DesignatorBase)((FactorFuncCall)parent).getDesignator().getDesignatorSpec()).getName());
+				method = findVisibleSymbol(((DesignatorBase)((FactorFuncCall)parent).getDesignator().getDesignatorSpec()).getName());	
 				break;
 			}
 		}
 		
-		log.info("METHOD "+(method!=null?method.getName():"null"));
+//		log.info("METHOD "+(method!=null?method.getName():"null"));
 		
 
 		if(method.getKind()==Obj.Meth) {
@@ -300,7 +300,7 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 	
 	public void visit(ExprTerm expr) {
-		log.info("exprterm"+ expr.getTerm().struct.getKind());
+//		log.info("exprterm"+ expr.getTerm().struct.getKind());
 		expr.struct = expr.getTerm().struct;
 	}
 
@@ -311,14 +311,12 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(ExprNegatedTerm expr) {
 		expr.struct = expr.getTerm().struct;
 		if(expr.struct != Tab.intType)
-		{//report error
+		{
+			log.info("Non-int expression can't be negative");
 		}
 	}
 	
 	public void visit(TermBase term) {
-		// factor struct null
-		log.info(term.toString(" "));
-		log.info("term"+ term.getFactor().struct.getKind());
 		term.struct = term.getFactor().struct;
 	}
 	
@@ -375,11 +373,11 @@ public class SemanticPass extends VisitorAdaptor {
 		}
 		
 		if(symbol==null) {
-			log.info("Couldn't find symbol in scope"+name);
+//			log.info("Couldn't find symbol in scope"+name);
 			if(Tab.currentScope().getLocals()!=null)
 				symbol = Tab.currentScope().getLocals().searchKey(name);
 			if(symbol==Tab.noObj || symbol==null) {
-				log.info("Couldn't find symbol in locals"+name);
+//				log.info("Couldn't find symbol in locals"+name);
 			}
 		}
 		
