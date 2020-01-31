@@ -3,6 +3,10 @@ program MJProgram
 	const int y = 5;
 	int a[];
 	char abc;
+	class Cl {
+    	int pos[], neg[];
+	{}}
+	Cl cclass;
 {
 
 	void b(int m, char n, int t[]) bool p; {
@@ -19,6 +23,14 @@ program MJProgram
 		y = k() + 3;
 		if(a > y)
 			b(k(), abc, b);
+		y();
+
+		a = new int[x];
+
+
+		x++;
+		y--;
+
 		print(y);
 		return 0;
 	}

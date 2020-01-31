@@ -193,6 +193,23 @@ public class SemanticPass extends VisitorAdaptor {
 		varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
 	}
 	
+	public void visit(FactorNewArray factorNewArr) {
+		if(factorNewArr.getExpr().struct != Tab.intType) {
+			log.info("Array size must be int");
+		}
+		factorNewArr.struct = new Struct(Struct.Array, factorNewArr.getType().struct);
+
+	}
+	
+	public void visit(FactorNew formalParamArr) {
+		Obj type = Tab.find(formalParamArr.getType().getTypeName());
+		if(type!=null && type.getType().getKind() != Struct.Class) {
+			log.info("Cannot dynamically allocate thing that's not a class");
+		}
+
+		formalParamArr.struct = type.getType();
+	}
+
 	public void visit(ClassName className) {
         className.obj = classDeclaration = Tab.insert(Obj.Type, className.getCName(), 
         		new Struct(Struct.Class));
@@ -310,7 +327,7 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 	
 	boolean compatibleTypes(Struct lhs, Struct rhs) {
-		if(lhs==rhs ||
+		if(lhs!=null && rhs!=null && lhs==rhs ||
 				(lhs.getKind() == Struct.Array 
 				&& lhs.getKind() == Struct.Array
 				&& compatibleTypes(lhs.getElemType(), rhs.getElemType()))
@@ -373,11 +390,41 @@ public class SemanticPass extends VisitorAdaptor {
     		log.info("Function not found.");
     	}
 		factor.getDesignator().obj = findVisibleSymbol(name);
+		if(factor.getDesignator().obj.getKind() != Obj.Meth) {
+			log.info("Trying to invoke symbol that is not a method.");
+		}
 		factor.struct = factor.getDesignator().obj.getType();
     }
     
     public void visit(DesignatorStatementFcall designator){
+		if(designator.getDesignator().obj.getKind() != Obj.Meth) {
+			log.info("Trying to invoke symbol that is not a method.");
+		}
         designator.obj = designator.getDesignator().obj;
+    }
+    		
+	public void visit(DesignatorStmtPostinc designator){
+		if(designator.getDesignator().obj.getType().getKind()
+				!= Struct.Int) {
+			log.info("Post increment operator requires int");
+		}
+        designator.obj = designator.getDesignator().obj;
+    }
+	
+	public void visit(DesignatorStmtPostdec designator){
+		if(designator.getDesignator().obj.getType().getKind()
+				!= Struct.Int) {
+			log.info("Post decrement operator requires int");
+		}
+        designator.obj = designator.getDesignator().obj;
+    }
+	
+    public void visit(DesignatorStatementAssign designator) {
+    	if(!compatibleTypes(designator.getDesignator().obj.getType(),
+    			designator.getExpr().struct)) {
+    		log.info("Incompatible type assignment on line "+designator.getLine());
+    	}
+    	designator.obj = designator.getDesignator().obj;
     }
     
     public void visit(Designator designator) {
