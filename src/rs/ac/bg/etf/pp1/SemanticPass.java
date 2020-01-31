@@ -158,6 +158,7 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	public void visit(MethodDeclaration methodDecl) {
 		methodDecl.obj = methodDecl.getMethodTypeName().obj;
+		methodDecl.obj.setLevel(method.getLocalSymbols().size());
     	Tab.chainLocalSymbols(methodDecl.getMethodTypeName().obj);
     	Tab.closeScope();
     	if(method.getName().equals("main") && 
@@ -275,6 +276,9 @@ public class SemanticPass extends VisitorAdaptor {
 						params = (ActualParams)(params.getActualParamList());
 					}
 					else {
+						if(i!=1) {
+							log.info("Invalid number of args in "+method.getName()+" on line "+actualParams.getLine());
+						}
 						param = (ActualParam)(params.getActualParamList());
 						params = null;
 					}
@@ -285,6 +289,10 @@ public class SemanticPass extends VisitorAdaptor {
 					} else log.info("param1notok");
 				}
 				
+			}
+			
+			if(param==null) {
+				log.info("Invalid number of args in "+method.getName()+" on line "+actualParams.getLine());
 			}
 		}
 	}
