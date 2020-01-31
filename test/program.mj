@@ -14,7 +14,7 @@ program MJProgram
 		return c+2;
 	}
 	
-	int main() {
+	void main() {
 		x = y + 2;
 		y = k() + 3;
 		b(k(), abc, a);

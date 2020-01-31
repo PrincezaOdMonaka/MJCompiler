@@ -42,6 +42,10 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(VarDecl varDecl) {
 		VarDeclList declList;
 		SyntaxNode parent;
+		if(findCurrentScope(varDecl.getVarName())!=null) {
+			log.info("Symbol with name " + varDecl.getVarName() + " already exists.");
+			return;
+		}
 		for(parent = varDecl.getParent(); 
 				!(parent instanceof VarDeclList); 
 				parent = parent.getParent());
@@ -78,6 +82,10 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(ConstDeclarationChar constChar) {
 		ConstDeclrChar declList;
 		SyntaxNode parent;
+		if(findCurrentScope(constChar.getCName())!=null) {
+			log.info("Symbol with name " + constChar.getCName() + " already exists.");
+			return;
+		}
 		for(parent = constChar.getParent(); 
 				!(parent instanceof ConstDeclrChar); 
 				parent = parent.getParent());
@@ -90,6 +98,10 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(ConstDeclarationBool constBool) {
 		ConstDeclrBool declList;
 		SyntaxNode parent;
+		if(findCurrentScope(constBool.getCName())!=null) {
+			log.info("Symbol with name " + constBool.getCName() + " already exists.");
+			return;
+		}
 		for(parent = constBool.getParent(); 
 				!(parent instanceof ConstDeclrBool); 
 				parent = parent.getParent());
@@ -104,6 +116,10 @@ public class SemanticPass extends VisitorAdaptor {
 	public void visit(ConstDeclarationNum constNum) {
 		ConstDeclrNum declList;
 		SyntaxNode parent;
+		if(findCurrentScope(constNum.getCName())!=null) {
+			log.info("Symbol with name " + constNum.getCName() + " already exists.");
+			return;
+		}
 		for(parent = constNum.getParent(); 
 				!(parent instanceof ConstDeclrNum); 
 				parent = parent.getParent());
@@ -144,7 +160,10 @@ public class SemanticPass extends VisitorAdaptor {
 		methodDecl.obj = methodDecl.getMethodTypeName().obj;
     	Tab.chainLocalSymbols(methodDecl.getMethodTypeName().obj);
     	Tab.closeScope();
-    	
+    	if(method.getName().equals("main") && 
+    			(method.getType()!=Tab.noType || method.getLocalSymbols().size()!=0)) {
+			log.info("Bad definition of main function.");
+    	}
     	method = null;
 	}
 	
@@ -156,6 +175,10 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 	
 	public void visit(FormalParamVar formalParamVar) {
+		if(findCurrentScope(formalParamVar.getParamId())!=null) {
+			log.info("Symbol with name " + formalParamVar.getParamId() + " already exists.");
+			return;
+		}
 		Obj varObj = Tab.insert(Obj.Var, formalParamVar.getParamId(), 
 				formalParamVar.getType().struct);
 		varObj.setFpPos(Tab.currentScope.getLocals().symbols().size()-1);
@@ -196,12 +219,12 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 	
 	public void visit(DesignatorBase base) {
-		base.obj = lookupSymbolInScope(base.getName());
+		base.obj = findVisibleSymbol(base.getName());
 //		log.info("Designator base" + base.obj + base.getName());
 	}
 	
 	public void visit(DesignatorMember member) {
-		member.obj = lookupSymbolInScope(member.getName());
+		member.obj = findVisibleSymbol(member.getName());
 	}
 	
 	public void visit(DesignatorIndex arrayIndex) {
@@ -328,10 +351,11 @@ public class SemanticPass extends VisitorAdaptor {
     						.getDesignator().getDesignatorSpec())
     				)).getName();
     	}
-    	if(name=="") log.info("err");
-		factor.getDesignator().obj = lookupSymbolInScope(name);
+    	if(name=="") {
+    		log.info("Function not found.");
+    	}
+		factor.getDesignator().obj = findVisibleSymbol(name);
 		factor.struct = factor.getDesignator().obj.getType();
-		log.info(factor.getDesignator().obj.getType().getKind()+"asdf");
     }
     
     public void visit(DesignatorStatementFcall designator){
@@ -342,7 +366,7 @@ public class SemanticPass extends VisitorAdaptor {
     	designator.obj = designator.getDesignatorSpec().obj;
     }
     
-	public Obj lookupSymbolInScope(String name) {
+	public Obj findVisibleSymbol(String name) {
 		Obj symbol = null;
 		Scope scope = Tab.currentScope();
 		while(symbol==null && scope!=null) {
@@ -362,6 +386,25 @@ public class SemanticPass extends VisitorAdaptor {
 		return symbol;	
 	}
 	
+	public Obj findCurrentScope(String name) {
+		Obj symbol = null;
+
+		if(Tab.currentScope() != null) {
+			symbol = Tab.currentScope().findSymbol(name);
+		}
+		
+		if(symbol==null) {
+			// log.info("Couldn't find symbol in scope"+name);
+			if(Tab.currentScope().getLocals()!=null)
+				symbol = Tab.currentScope().getLocals().searchKey(name);
+			if(symbol==Tab.noObj || symbol==null) {
+				symbol = null;
+				// log.info("Couldn't find symbol in locals"+name);
+			}
+		}
+		return symbol;	
+	}
+	
 	public boolean actParsExprCondition(SyntaxNode parent) {
 		return parent instanceof ActualsPars
 				| parent instanceof PrintStmt
@@ -377,6 +420,9 @@ public class SemanticPass extends VisitorAdaptor {
     }
     
     public void visit(Program program) { 
+    	if(findVisibleSymbol("main")==null) {
+    		log.info("Main not defined");
+    	}
     	Tab.chainLocalSymbols(program.getProgName().obj);
     	Tab.closeScope();
     }
