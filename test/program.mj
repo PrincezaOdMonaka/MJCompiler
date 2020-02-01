@@ -1,14 +1,21 @@
 program MJProgram
 	int a[];
-	bool b;
+	int b;
 {
+	void c() {
+		print('c');
+	}
+	int d() {return 1;}
 	
 	void main() {
-		a = new int[5];
-		b = true;
+		b = 6;
+		
+		c();
+		b = d();
+		
 		print(7);
 		print(eol);
-		print(9);
+		print(b);
 		return;
 	}
 }

@@ -7,6 +7,8 @@ import rs.ac.bg.etf.pp1.CounterVisitor.VarCounter;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
+import rs.etf.pp1.symboltable.concepts.Obj;
+import rs.etf.pp1.symboltable.concepts.Struct;
 
 public class CodeGenerator extends VisitorAdaptor {
 
@@ -43,6 +45,26 @@ public class CodeGenerator extends VisitorAdaptor {
         Code.loadConst(factorChar.getCharFactor());
     }
     
+    public void visit(FactorDesignator factorDesignator){
+        Code.load(factorDesignator.getDesignator().obj);
+    }
+    
+	public void visit(FactorFuncCall funcCall){
+		Obj functionObj = funcCall.getDesignator().obj;
+		int offset = functionObj.getAdr() - Code.pc;
+		Code.put(Code.call);
+		Code.put2(offset);
+
+	}
+	
+	public void visit(DesignatorStatementFcall funcCall){
+		Obj functionObj = funcCall.getDesignator().obj;
+		int offset = functionObj.getAdr() - Code.pc;
+		Code.put(Code.call);
+		Code.put2(offset);
+
+	}
+	
     public void visit(TermList termList){
         if(termList.getMulop() instanceof Mulopr)
             Code.put(Code.mul);
@@ -50,6 +72,16 @@ public class CodeGenerator extends VisitorAdaptor {
             Code.put(Code.div);
         else if(termList.getMulop() instanceof Modopr)
             Code.put(Code.rem);
+    }
+    
+    public void visit(DesignatorStatementAssign designatorAssign){
+        Code.store(designatorAssign.getDesignator().obj);
+    }
+    
+    public void visit(DesignatorBase designatorBase){
+        if(designatorBase.obj.getKind() == Obj.Fld || 
+        		(designatorBase.obj.getKind() == Obj.Meth && designatorBase.obj.getFpPos() == 1))
+            Code.load(designatorBase.obj);
     }
     
 	public void visit(VoidMethodTypeName methodTypeName){
@@ -74,8 +106,24 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	}
 	
+	public void visit(TypeMethodTypeName methodTypeName){
+		methodTypeName.obj.setAdr(Code.pc);
+		// Collect arguments and local variables
+		SyntaxNode methodNode = methodTypeName.getParent();
+	
+		VarCounter varCnt = new VarCounter();
+		methodNode.traverseTopDown(varCnt);
+		
+		FormParamCounter fpCnt = new FormParamCounter();
+		methodNode.traverseTopDown(fpCnt);
+		
+		// Generate the entry
+		Code.put(Code.enter);
+		Code.put(fpCnt.getCount());
+		Code.put(fpCnt.getCount() + varCnt.getCount());
+	
+	}
 	public void visit(MethodDeclaration methodDecl){
-		log.info("Methoddecl");
 		Code.put(Code.exit);
 		Code.put(Code.return_);
 	}

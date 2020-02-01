@@ -60,11 +60,11 @@ public class SemanticPass extends VisitorAdaptor {
 		declList = (VarDeclList) parent;
 
 		Obj var;
-		if(method == null) {
-			if(classDeclaration==null) varDeclCount++;
+		if(classDeclaration!=null) {
 			var = Tab.insert(Obj.Fld, varDecl.getVarName(), declList.getType().struct);
 		}
 		else {
+			if(method==null) varDeclCount++;
 			var = Tab.insert(Obj.Var, varDecl.getVarName(), declList.getType().struct);
 		}
 		var.setFpPos(-1);
