@@ -32,7 +32,18 @@
 	<replace dir="src" value="rs.ac.bg.etf.pp1.ast" token="src.rs.ac.bg.etf.pp1.ast" summary="true"/>
 	</target>
 	
-    <target name="disasm">
+	<target name="compileobj">
+	        <java classname="rs.ac.bg.etf.pp1.MJParserTest" classpath="bin/" fork="true">
+	            <classpath>
+	                <fileset dir="lib/">
+	                </fileset>
+	            </classpath>
+	            <arg value="test/program.mj"/>
+	            <arg value="test/program.obj"/>
+	        </java>
+	    </target>
+	
+    <target name="disasm" depends="compileobj">
         <java classname="rs.etf.pp1.mj.runtime.disasm">
             <arg value="test/program.obj"/>
             <classpath>
@@ -46,8 +57,8 @@
             <arg value="test/program.obj"/>
             <classpath>
                 <pathelement location="lib/mj-runtime.jar"/>
-            </classpath>
-            <redirector input="test/program.in"/>
+            </classpath>          
+        	<redirector input="test/program.in"/>
         </java>
     </target>
 	

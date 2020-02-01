@@ -31,7 +31,6 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 
     public void visit(FactorNum factorNum){
-    	log.info("factornum"+factorNum.getNumberFactor());
         Code.loadConst(factorNum.getNumberFactor());
     }
 
@@ -66,8 +65,6 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	public void visit(IndexMid midIndex) {
-		log.info("index"+((DesignatorIndex)(midIndex.getParent())).getDesignator().obj.getKind()
-				+((DesignatorIndex)(midIndex.getParent())).getDesignator().obj.getType().getKind());
 		Code.load(((DesignatorIndex)(midIndex.getParent())).getDesignator().obj);
 	}
 	
@@ -85,12 +82,18 @@ public class CodeGenerator extends VisitorAdaptor {
             Code.put(Code.rem);
     }
     
+    public void visit(ExprList list){
+        if(list.getAddop() instanceof Addopr)
+            Code.put(Code.add);
+        else
+            Code.put(Code.sub);
+    }
+    
     public void visit(DesignatorStatementAssign designatorAssign){
         Code.store(designatorAssign.getDesignator().obj);
     }
     
     public void visit(DesignatorBase designatorBase){
-    	log.info("base");
         if(designatorBase.obj.getKind() == Obj.Fld || 
         		(designatorBase.obj.getKind() == Obj.Meth && designatorBase.obj.getFpPos() == 1))
             Code.load(designatorBase.obj);
@@ -139,4 +142,14 @@ public class CodeGenerator extends VisitorAdaptor {
 		Code.put(Code.exit);
 		Code.put(Code.return_);
 	}
+	
+    public void visit(ReadStatement readStatement){
+        Obj obj = readStatement.getDesignator().obj;
+        if(obj.getType().getKind() == Struct.Char)
+            Code.put(Code.bread);
+        else
+            Code.put(Code.read);
+
+        Code.store(obj);
+    }
 }

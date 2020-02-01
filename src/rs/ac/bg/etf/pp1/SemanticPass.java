@@ -388,6 +388,15 @@ public class SemanticPass extends VisitorAdaptor {
 		term.struct = term.getFactor().struct;
 	}
 	
+	public void visit(TermList termList) {
+		if(termList.getFactor().struct!=termList.getTerm().struct) {
+			reportError("Factors of incompatible type.", termList);
+		}else if(termList.getFactor().struct!=Tab.intType || termList.getTerm().struct!=Tab.intType) {
+			reportError("Factor type incompatible with operation ", termList);
+		}
+		termList.struct = termList.getFactor().struct;
+	}
+	
 	 public void visit(FactorNum factorNum){
 	        factorNum.struct = Tab.intType;
 	    }

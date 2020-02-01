@@ -1,6 +1,7 @@
 program MJProgram
 	int a[];
 	int b;
+	char e;
 {
 	void c() {
 		print('c');
@@ -14,13 +15,16 @@ program MJProgram
 		b = d();
 		
 		a = new int[2];
-		a[0] = 10;
+		a[0] = 10*2+b;
 		
 		print(a[0]);
 		
+		read(e);
+		print(e);
+		
 		print(7);
 		print(eol);
-		print(b);
+		print(d());
 		return;
 	}
 }
