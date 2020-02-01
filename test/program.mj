@@ -1,38 +1,14 @@
 program MJProgram
-	int x; 
-	const int y = 5;
 	int a[];
-	int d[];
-	char abc;
-	class Cl {
-    	int pos[], neg[];
-	{
-		void q(int a) {}
-	}}
-	Cl cclass;
+	bool b;
 {
-
-	void b(int m, char n, int t[]) bool p; {
-		return;
-	}
-	
-	int k () int c; {
-		c = 1;
-		return c+2;
-	}
 	
 	void main() {
-		x = y + 2;
-		y = k() + 3;
-		if(x > y)
-			b(k(), abc, a);
-
-		a = new int[x];
-
-		d = a;
-		x++;
-		y--;
-		print(y);
-		return 0;
+		a = new int[5];
+		b = true;
+		print(7);
+		print(eol);
+		print(9);
+		return;
 	}
 }

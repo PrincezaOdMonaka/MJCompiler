@@ -304,9 +304,7 @@ public class SemanticPass extends VisitorAdaptor {
 				if(params!=null){
 //					log.info(arg.getType().getKind()+"");
 //					log.info(params.getExpr().struct.getKind()+"");
-					if(compatibleTypes(arg.getType(), params.getExpr().struct)) {
-						log.info("paramsok");
-					} else 
+					if(!compatibleTypes(arg.getType(), params.getExpr().struct))
 						reportError("Function parameters invalid on position "+arg.getFpPos(), actualParams);
 					
 					if(params.getActualParamList() instanceof ActualParams) {
