@@ -79,13 +79,15 @@ public class SemanticPass extends VisitorAdaptor {
 
 		declList = (VarDeclList) parent;
 		Struct arrayType = new Struct(Struct.Array, declList.getType().struct);
-		if(method == null) {
-			if(classDeclaration==null) varDeclCount++;
-			Tab.insert(Obj.Fld, varDeclArr.getVarName(), arrayType);
+		Obj var;
+		if(classDeclaration!=null) {
+			var = Tab.insert(Obj.Fld, varDeclArr.getVarName(), arrayType);
 		}
 		else {
-			Tab.insert(Obj.Var, varDeclArr.getVarName(), arrayType);
+			if(method==null) varDeclCount++;
+			var = Tab.insert(Obj.Var, varDeclArr.getVarName(), arrayType);
 		}
+		var.setFpPos(-1);
 	}
 	
 	public void visit(ConstDeclarationChar constChar) {

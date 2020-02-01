@@ -31,6 +31,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 
     public void visit(FactorNum factorNum){
+    	log.info("factornum"+factorNum.getNumberFactor());
         Code.loadConst(factorNum.getNumberFactor());
     }
 
@@ -54,7 +55,6 @@ public class CodeGenerator extends VisitorAdaptor {
 		int offset = functionObj.getAdr() - Code.pc;
 		Code.put(Code.call);
 		Code.put2(offset);
-
 	}
 	
 	public void visit(DesignatorStatementFcall funcCall){
@@ -64,6 +64,17 @@ public class CodeGenerator extends VisitorAdaptor {
 		Code.put2(offset);
 
 	}
+	
+	public void visit(IndexMid midIndex) {
+		log.info("index"+((DesignatorIndex)(midIndex.getParent())).getDesignator().obj.getKind()
+				+((DesignatorIndex)(midIndex.getParent())).getDesignator().obj.getType().getKind());
+		Code.load(((DesignatorIndex)(midIndex.getParent())).getDesignator().obj);
+	}
+	
+    public void visit(FactorNewArray factorNewArray){
+        Code.put(Code.newarray);
+        Code.put(factorNewArray.getType().struct == Tab.charType ? 0 : 1);
+    }
 	
     public void visit(TermList termList){
         if(termList.getMulop() instanceof Mulopr)
@@ -79,10 +90,11 @@ public class CodeGenerator extends VisitorAdaptor {
     }
     
     public void visit(DesignatorBase designatorBase){
+    	log.info("base");
         if(designatorBase.obj.getKind() == Obj.Fld || 
         		(designatorBase.obj.getKind() == Obj.Meth && designatorBase.obj.getFpPos() == 1))
             Code.load(designatorBase.obj);
-    }
+    }    
     
 	public void visit(VoidMethodTypeName methodTypeName){
 		

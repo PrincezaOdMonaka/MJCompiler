@@ -74,7 +74,7 @@ terminal Character CHAR_CONST;
 terminal String IDENT ;
 terminal IF, ELSE;
 
-nonterminal MethodDeclList, DeclList;
+nonterminal IndexMid, MethodDeclList, DeclList;
 nonterminal FormalParamList, FormalParamDecl, FormParams, ActualParamList, ForStmt, Addop, Mulop, Relop; 
 nonterminal StatementList, Statement, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
@@ -246,10 +246,12 @@ OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList OP_RIGHT_BR
 
 DesignatorSpec ::= (DesignatorBase) IDENT:name
 			 | (DesignatorMember) Designator OP_DOT IDENT:name	
-			 | (DesignatorIndex) Designator:arrName OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
+			 | (DesignatorIndex) Designator:arrName IndexMid OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
 			 |
 			 (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :}
 ;
+
+IndexMid ::= (IndexMid);
 
 Designator ::= (Designator) DesignatorSpec;
 

@@ -74,6 +74,7 @@ terminal Character CHAR_CONST;
 terminal String IDENT ;
 terminal IF, ELSE;
 
+nonterminal IndexMid IndexMid;
 nonterminal MethodDeclList MethodDeclList;
 nonterminal DeclList DeclList;
 nonterminal FormalParamList FormalParamList;
@@ -266,10 +267,12 @@ OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList:S1 OP_RIGHT
 
 DesignatorSpec ::= (DesignatorBase) IDENT:name {: RESULT=new DesignatorBase(name); RESULT.setLine(nameleft); :}
 			 | (DesignatorMember) Designator:D1 OP_DOT IDENT:name {: RESULT=new DesignatorMember(D1, name); RESULT.setLine(D1left); :}	
-			 | (DesignatorIndex) Designator:arrName OP_LEFT_SQUARE Expr:E1 OP_RIGHT_SQUARE {: RESULT=new DesignatorIndex(arrName, E1); RESULT.setLine(arrNameleft); :}	
+			 | (DesignatorIndex) Designator:arrName IndexMid:I1 OP_LEFT_SQUARE Expr:E2 OP_RIGHT_SQUARE {: RESULT=new DesignatorIndex(arrName, I1, E2); RESULT.setLine(arrNameleft); :}	
 			 |
 			 (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :} {: RESULT=new DesignatorErr(); :}
 ;
+
+IndexMid ::= (IndexMid) {: RESULT=new IndexMid(); :};
 
 Designator ::= (Designator) DesignatorSpec:D1 {: RESULT=new Designator(D1); RESULT.setLine(D1left); :};
 
