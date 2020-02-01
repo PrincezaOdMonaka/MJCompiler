@@ -218,6 +218,10 @@ public class SemanticPass extends VisitorAdaptor {
 
 		formalParamArr.struct = type.getType();
 	}
+	
+	public void visit(FactorParen factorParen) {
+		factorParen.struct = factorParen.getExpr().struct;
+	}
 
 	public void visit(ClassName className) {
         className.obj = classDeclaration = Tab.insert(Obj.Type, className.getCName(), 
@@ -513,6 +517,16 @@ public class SemanticPass extends VisitorAdaptor {
     public void visit(ProgName progName) { 
     	progName.obj = Tab.insert(Obj.Prog, progName.getPName(), Tab.noType);
     	Tab.openScope();
+    }
+    
+    public void visit(PrintStmt print) {
+    	if(print.getExpr().struct != Tab.intType
+    			&& print.getExpr().struct != Tab.charType)
+    	{
+    		reportError("Incompatible type for print statement", print);
+    		return;
+    	}
+    	printCallCount++;
     }
     
     public void visit(Program program) { 
