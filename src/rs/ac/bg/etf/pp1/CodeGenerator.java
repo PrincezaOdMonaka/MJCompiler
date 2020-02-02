@@ -189,17 +189,17 @@ public class CodeGenerator extends VisitorAdaptor {
     
     public void visit(CondBaseTerm condFact) {
     	
-    	Code.loadConst(1);
+    	Code.loadConst(0);
         Code.put(Code.jcc + Code.eq);
 	        Code.put2(7);
 	     // false
-	     Code.loadConst(0);
+	     Code.loadConst(1);
 	     Code.put(Code.jmp);
 	     Code.put2(7);   
 	     //true                                                                             
-	     Code.loadConst(1);
+	     Code.loadConst(0);
 	     Code.put(Code.jmp); 
-        ifBeginAddrStack.push(Code.pc);
+	     nextOrAddrStack.push(Code.pc);
         Code.put2(0);
     	
     	// condFact value on e stack

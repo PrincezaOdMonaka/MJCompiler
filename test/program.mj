@@ -16,7 +16,7 @@ program MJProgram
 	void main() {
 		b = 6;
 		e = 'g';
-		if(b==3)
+		if(b==8)
 			c();
 		else {
 			p();
