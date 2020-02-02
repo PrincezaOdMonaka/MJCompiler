@@ -1,5 +1,7 @@
 package rs.ac.bg.etf.pp1;
 
+import java.util.Stack;
+
 import com.sun.istack.internal.logging.Logger;
 
 import rs.ac.bg.etf.pp1.CounterVisitor.FormParamCounter;
@@ -14,7 +16,12 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	int mainPc;
 	int varDataSize;
+	int boolFalse = 0;
+	int boolTrue = 1;
+	
 	Logger log = Logger.getLogger(getClass());
+	
+	Stack<Integer> ifAddrStack = new Stack<>();
 
 	int getMainPc(){
 		return mainPc;
@@ -152,4 +159,59 @@ public class CodeGenerator extends VisitorAdaptor {
 
         Code.store(obj);
     }
+    
+    // Conditions
+    
+    //ifAddrStack
+    
+    int getRelOpCode(Relop relOp) {
+        if (relOp instanceof RelopEq) return Code.eq;
+        if (relOp instanceof RelopNeq) return Code.ne;
+        if (relOp instanceof RelopGt) return Code.gt;
+        if (relOp instanceof RelopGteq) return Code.ge;
+        if (relOp instanceof RelopLt) return Code.lt;
+        return Code.le;
+    }
+    
+    public void visit(CondFactRelop condFact) {
+    	int relOpCode = getRelOpCode(condFact.getRelop());
+    	
+    	Code.put(Code.jcc + relOpCode);
+        Code.put2(7);
+        Code.loadConst(0);    
+        Code.put(Code.jmp);
+        Code.put2(4);
+        Code.loadConst(1);
+    }
+    
+    public void visit(CondBaseTerm condFact) {
+    	// nothing, condFact value on e stack
+    }
+    
+    public void visit(CondBaseStatement condBaseStmt) {
+    	// nothing, condFact value on e stack
+    }
+    
+    public void visit(ConditionStatement condStatement) {
+    	int pc = Code.pc;
+    	
+        int address= 0;
+        
+        while(!ifAddrStack.isEmpty()) {
+        	address = ifAddrStack.pop();
+            Code.put2(address, pc - address + 1);
+        }
+    }
+
+    
+    public void visit(IfStatement ifStatement) {
+    	Code.loadConst(1);
+        Code.put(Code.jcc + Code.eq);
+        Code.put2(6);
+        Code.put(Code.jmp);
+        ifAddrStack.push(Code.pc);
+        Code.put2(0);
+    }
+    
+    
 }

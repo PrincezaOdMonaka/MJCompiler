@@ -91,7 +91,7 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj
       Designator,DesignatorSpec, 
       DesignatorStmt, ActPars;
 
-nonterminal VarDeclList, VarDeclMul;
+nonterminal VarDeclList, VarDeclMul, IfStatement;
 nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
 	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
 	ConstDeclBool, ConstDeclBoolMul, ConstDecl; 
@@ -221,7 +221,7 @@ StatementList ::= (Statements) StatementList Statement
 
 Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 			  |
-			  (ConditionStatement) IF OP_LEFT_PAREN CondStatement OP_RIGHT_PAREN OneOrBlockStatement ElseStatement
+			  (ConditionStatement) IfStatement OneOrBlockStatement ElseStatement
 			  |
 			  (ForStatement) ForStmt
 			  |
@@ -240,6 +240,8 @@ Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 			 (StatementError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in statement declaration"); :}
 ;
 
+IfStatement ::= (IfStatement) IF OP_LEFT_PAREN CondStatement OP_RIGHT_PAREN;
+
 OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList OP_RIGHT_BRACE |
 						(OneStatement) Statement;
 
@@ -247,8 +249,7 @@ OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList OP_RIGHT_BR
 DesignatorSpec ::= (DesignatorBase) IDENT:name
 			 | (DesignatorMember) Designator OP_DOT IDENT:name	
 			 | (DesignatorIndex) Designator:arrName IndexMid OP_LEFT_SQUARE Expr OP_RIGHT_SQUARE	
-			 |
-			 (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :}
+			 | (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :}
 ;
 
 IndexMid ::= (IndexMid);

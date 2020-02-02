@@ -11,7 +11,9 @@ program MJProgram
 	void main() {
 		b = 6;
 		
-		c();
+		if(true || false)
+			c();
+			
 		b = d();
 		
 		a = new int[2];

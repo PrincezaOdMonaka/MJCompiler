@@ -109,6 +109,7 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj
 
 nonterminal VarDeclList VarDeclList;
 nonterminal VarDeclMul VarDeclMul;
+nonterminal IfStatement IfStatement;
 nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDeclChar, 
 	ConstDeclCharMul, ConstDeclNum, ConstDeclNumMul, 
 	ConstDeclBool, ConstDeclBoolMul, ConstDecl; 
@@ -242,7 +243,7 @@ StatementList ::= (Statements) StatementList:S1 Statement:S2 {: RESULT=new State
 
 Statement ::= (DesignatorStatement) DesignatorStmt:D1 OP_SEMICOLON {: RESULT=new DesignatorStatement(D1); RESULT.setLine(D1left); :}
 			  |
-			  (ConditionStatement) IF OP_LEFT_PAREN CondStatement:C1 OP_RIGHT_PAREN OneOrBlockStatement:O2 ElseStatement:E3 {: RESULT=new ConditionStatement(C1, O2, E3); RESULT.setLine(C1left); :}
+			  (ConditionStatement) IfStatement:I1 OneOrBlockStatement:O2 ElseStatement:E3 {: RESULT=new ConditionStatement(I1, O2, E3); RESULT.setLine(I1left); :}
 			  |
 			  (ForStatement) ForStmt:F1 {: RESULT=new ForStatement(F1); RESULT.setLine(F1left); :}
 			  |
@@ -261,6 +262,8 @@ Statement ::= (DesignatorStatement) DesignatorStmt:D1 OP_SEMICOLON {: RESULT=new
 			 (StatementError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in statement declaration"); :} {: RESULT=new StatementError(); :}
 ;
 
+IfStatement ::= (IfStatement) IF OP_LEFT_PAREN CondStatement:C1 OP_RIGHT_PAREN {: RESULT=new IfStatement(C1); RESULT.setLine(C1left); :};
+
 OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList:S1 OP_RIGHT_BRACE {: RESULT=new BlockStatement(S1); RESULT.setLine(S1left); :} |
 						(OneStatement) Statement:S1 {: RESULT=new OneStatement(S1); RESULT.setLine(S1left); :};
 
@@ -268,8 +271,7 @@ OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList:S1 OP_RIGHT
 DesignatorSpec ::= (DesignatorBase) IDENT:name {: RESULT=new DesignatorBase(name); RESULT.setLine(nameleft); :}
 			 | (DesignatorMember) Designator:D1 OP_DOT IDENT:name {: RESULT=new DesignatorMember(D1, name); RESULT.setLine(D1left); :}	
 			 | (DesignatorIndex) Designator:arrName IndexMid:I1 OP_LEFT_SQUARE Expr:E2 OP_RIGHT_SQUARE {: RESULT=new DesignatorIndex(arrName, I1, E2); RESULT.setLine(arrNameleft); :}	
-			 |
-			 (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :} {: RESULT=new DesignatorErr(); :}
+			 | (DesignatorErr) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in designator declaration"); :} {: RESULT=new DesignatorErr(); :}
 ;
 
 IndexMid ::= (IndexMid) {: RESULT=new IndexMid(); :};
