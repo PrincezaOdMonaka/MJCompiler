@@ -6,15 +6,22 @@ program MJProgram
 	void c() {
 		print('c');
 	}
+	
 	int d() {return 1;}
+	
+	void p() {
+		print('p');
+	}
 	
 	void main() {
 		b = 6;
 		
-		if(true || false)
+		if(false)
 			c();
-			
-		b = d();
+		else {
+			p();
+			b = d();
+		}
 		
 		a = new int[2];
 		a[0] = 10*2+b;

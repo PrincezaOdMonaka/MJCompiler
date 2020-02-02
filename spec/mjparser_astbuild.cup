@@ -96,6 +96,7 @@ nonterminal CondFact CondFact;
 nonterminal ElseStatement ElseStatement;
 
 nonterminal VarDeclBase VarDeclBase;
+nonterminal IfEnd IfEnd;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
@@ -126,6 +127,7 @@ nonterminal AnyMethodDeclList AnyMethodDeclList;
 nonterminal ExtendDecl ExtendDecl;
 nonterminal AbsMethodDecl AbsMethodDecl;
 nonterminal VarDeclListMul VarDeclListMul;
+nonterminal ElseBegin ElseBegin;
 
 precedence left ELSE;
 
@@ -243,7 +245,7 @@ StatementList ::= (Statements) StatementList:S1 Statement:S2 {: RESULT=new State
 
 Statement ::= (DesignatorStatement) DesignatorStmt:D1 OP_SEMICOLON {: RESULT=new DesignatorStatement(D1); RESULT.setLine(D1left); :}
 			  |
-			  (ConditionStatement) IfStatement:I1 OneOrBlockStatement:O2 ElseStatement:E3 {: RESULT=new ConditionStatement(I1, O2, E3); RESULT.setLine(I1left); :}
+			  (ConditionStatement) IfStatement:I1 OneOrBlockStatement:O2 IfEnd:I3 ElseStatement:E4 {: RESULT=new ConditionStatement(I1, O2, I3, E4); RESULT.setLine(I1left); :}
 			  |
 			  (ForStatement) ForStmt:F1 {: RESULT=new ForStatement(F1); RESULT.setLine(F1left); :}
 			  |
@@ -264,6 +266,7 @@ Statement ::= (DesignatorStatement) DesignatorStmt:D1 OP_SEMICOLON {: RESULT=new
 
 IfStatement ::= (IfStatement) IF OP_LEFT_PAREN CondStatement:C1 OP_RIGHT_PAREN {: RESULT=new IfStatement(C1); RESULT.setLine(C1left); :};
 
+IfEnd ::= (IfEnd) {: RESULT=new IfEnd(); :};
 OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList:S1 OP_RIGHT_BRACE {: RESULT=new BlockStatement(S1); RESULT.setLine(S1left); :} |
 						(OneStatement) Statement:S1 {: RESULT=new OneStatement(S1); RESULT.setLine(S1left); :};
 
@@ -290,8 +293,10 @@ DesignatorStmtOpt ::= (DesignatorStatementOptional) DesignatorStmt:D1 {: RESULT=
 					| (NoDesignatorStatement) {: RESULT=new NoDesignatorStatement(); :}
 					;
 					
-ElseStatement ::= (ElseStmt) ELSE OneOrBlockStatement:O1 {: RESULT=new ElseStmt(O1); RESULT.setLine(O1left); :}
+ElseStatement ::= (ElseStmt) ELSE ElseBegin:E1 OneOrBlockStatement:O2 {: RESULT=new ElseStmt(E1, O2); RESULT.setLine(E1left); :}
 				| (NoElseStmt) {: RESULT=new NoElseStmt(); :};
+				
+ElseBegin ::= (ElseBegin) {: RESULT=new ElseBegin(); :};
 
 CondStatement ::= (ConditionStmt) CondStatement:C1 OP_OR CondTerm:C2 {: RESULT=new ConditionStmt(C1, C2); RESULT.setLine(C1left); :}
 				| (CondBaseStatement) CondTerm:C1 {: RESULT=new CondBaseStatement(C1); RESULT.setLine(C1left); :};

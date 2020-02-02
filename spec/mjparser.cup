@@ -79,7 +79,7 @@ nonterminal FormalParamList, FormalParamDecl, FormParams, ActualParamList, ForSt
 nonterminal StatementList, Statement, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
 
-nonterminal VarDeclBase;
+nonterminal VarDeclBase, IfEnd;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Term;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr;
@@ -103,7 +103,7 @@ nonterminal rs.etf.pp1.symboltable.concepts.Obj
 	CName, ACName;
 
 nonterminal ClassMethodDeclList, AbsClassMethodDeclList, AnyMethodDeclList, ExtendDecl, AbsMethodDecl;
-nonterminal VarDeclListMul;
+nonterminal VarDeclListMul, ElseBegin;
 
 precedence left ELSE;
 
@@ -221,7 +221,7 @@ StatementList ::= (Statements) StatementList Statement
 
 Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 			  |
-			  (ConditionStatement) IfStatement OneOrBlockStatement ElseStatement
+			  (ConditionStatement) IfStatement OneOrBlockStatement IfEnd ElseStatement
 			  |
 			  (ForStatement) ForStmt
 			  |
@@ -242,6 +242,7 @@ Statement ::= (DesignatorStatement) DesignatorStmt OP_SEMICOLON
 
 IfStatement ::= (IfStatement) IF OP_LEFT_PAREN CondStatement OP_RIGHT_PAREN;
 
+IfEnd ::= (IfEnd);
 OneOrBlockStatement ::= (BlockStatement) OP_LEFT_BRACE StatementList OP_RIGHT_BRACE |
 						(OneStatement) Statement;
 
@@ -268,8 +269,10 @@ DesignatorStmtOpt ::= (DesignatorStatementOptional) DesignatorStmt
 					| (NoDesignatorStatement)
 					;
 					
-ElseStatement ::= (ElseStmt) ELSE OneOrBlockStatement
+ElseStatement ::= (ElseStmt) ELSE ElseBegin OneOrBlockStatement
 				| (NoElseStmt);
+				
+ElseBegin ::= (ElseBegin);
 
 CondStatement ::= (ConditionStmt) CondStatement OP_OR CondTerm
 				| (CondBaseStatement) CondTerm;

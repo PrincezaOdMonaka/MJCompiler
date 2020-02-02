@@ -22,7 +22,8 @@ public class CodeGenerator extends VisitorAdaptor {
 	Logger log = Logger.getLogger(getClass());
 	
 	Stack<Integer> ifAddrStack = new Stack<>();
-
+	Stack<Integer> elseAddrStack = new Stack<>();
+	Stack<Integer> ifEndAddrStack = new Stack<>();
 	int getMainPc(){
 		return mainPc;
 	}
@@ -197,6 +198,15 @@ public class CodeGenerator extends VisitorAdaptor {
     	
         int address= 0;
         
+        int elseRet = elseAddrStack.pop();
+        if(elseRet != -1) {
+        	address = ifAddrStack.pop();
+        	Code.put2(address, elseRet - address + 1);
+        }
+        
+        int ifend = ifEndAddrStack.pop();
+        Code.put2(ifend, pc - ifend + 1);
+        
         while(!ifAddrStack.isEmpty()) {
         	address = ifAddrStack.pop();
             Code.put2(address, pc - address + 1);
@@ -212,6 +222,21 @@ public class CodeGenerator extends VisitorAdaptor {
         ifAddrStack.push(Code.pc);
         Code.put2(0);
     }
+
+    public void visit(NoElseStmt noElse) {
+    	log.info("noelse");
+    	elseAddrStack.push(-1);
+    }
     
+    public void visit(ElseBegin elseBegin) {
+    	log.info("elsebg");
+    	elseAddrStack.push(Code.pc);
+    }
+    
+    public void visit (IfEnd ifEnd ) {
+    	Code.put(Code.jmp);
+        ifEndAddrStack.push(Code.pc);
+        Code.put2(0);
+    }
     
 }
