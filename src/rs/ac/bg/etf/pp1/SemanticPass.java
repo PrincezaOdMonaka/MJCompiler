@@ -253,15 +253,26 @@ public class SemanticPass extends VisitorAdaptor {
 	
 	public void visit(DesignatorBase base) {
 		base.obj = findVisibleSymbol(base.getName());
+		if(base.obj==null ) {
+			reportError("Symbol not found: " + base.getName() +"", base);
+		}
 //		log.info("Designator base" + base.obj + base.getName());
 	}
 	
 	public void visit(DesignatorMember member) {
 		member.obj = findVisibleSymbol(member.getName());
+		if(member.obj==null) {
+			reportError("Symbol not found: " + member.getName() +"", member);
+		}
 	}
 	
 	public void visit(DesignatorIndex arrayIndex) {
         Obj parent = arrayIndex.getDesignator().obj;
+        if(parent == null) {
+    		if(arrayIndex.obj==null ) {
+    			reportError("Symbol not found ", arrayIndex);
+    		}
+        }
         arrayIndex.obj = new Obj(Obj.Elem, "", parent.getType().getElemType());
 	}
 	
@@ -358,11 +369,11 @@ public class SemanticPass extends VisitorAdaptor {
 	}
 	
 	boolean compatibleTypes(Struct lhs, Struct rhs) {
-		if(lhs!=null && rhs!=null && lhs==rhs ||
+		if(lhs!=null && rhs!=null && (lhs==rhs ||
 				(lhs.getKind() == Struct.Array 
 				&& lhs.getKind() == Struct.Array
 				&& compatibleTypes(lhs.getElemType(), rhs.getElemType()))
-			)
+			))
 			return true;
 		return false;
 	}
@@ -410,6 +421,7 @@ public class SemanticPass extends VisitorAdaptor {
     }
     //nije ok error detection
     public void visit(FactorDesignator designator){
+    	
         designator.struct = designator.getDesignator().getDesignatorSpec().obj.getType();
     }
 
