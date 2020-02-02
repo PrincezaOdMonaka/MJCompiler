@@ -77,7 +77,7 @@ terminal IF, ELSE;
 nonterminal IndexMid, MethodDeclList, DeclList;
 nonterminal FormalParamList, FormalParamDecl, FormParams, ActualParamList, ForStmt, Addop, Mulop, Relop; 
 nonterminal StatementList, Statement, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
-nonterminal CondStatement, CondTerm, CondFact, ElseStatement;
+nonterminal CondStatement, CondStatement2, CondTerm, CondFact, ElseStatement;
 
 nonterminal VarDeclBase, IfEnd;
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type; 
@@ -274,7 +274,9 @@ ElseStatement ::= (ElseStmt) ELSE ElseBegin OneOrBlockStatement
 				
 ElseBegin ::= (ElseBegin);
 
-CondStatement ::= (ConditionStmt) CondStatement OP_OR CondTerm
+CondStatement ::= (CondStatementWrapper) CondStatement2;
+
+CondStatement2 ::= (ConditionStmt) CondStatement OP_OR CondTerm
 				| (CondBaseStatement) CondTerm;
 				
 CondTerm ::= (ConditionTerm) CondTerm OP_AND CondFact

@@ -91,6 +91,7 @@ nonterminal DesignatorStmtOpt DesignatorStmtOpt;
 nonterminal CondStatementOpt CondStatementOpt;
 nonterminal OneOrBlockStatement OneOrBlockStatement;
 nonterminal CondStatement CondStatement;
+nonterminal CondStatement2 CondStatement2;
 nonterminal CondTerm CondTerm;
 nonterminal CondFact CondFact;
 nonterminal ElseStatement ElseStatement;
@@ -298,7 +299,9 @@ ElseStatement ::= (ElseStmt) ELSE ElseBegin:E1 OneOrBlockStatement:O2 {: RESULT=
 				
 ElseBegin ::= (ElseBegin) {: RESULT=new ElseBegin(); :};
 
-CondStatement ::= (ConditionStmt) CondStatement:C1 OP_OR CondTerm:C2 {: RESULT=new ConditionStmt(C1, C2); RESULT.setLine(C1left); :}
+CondStatement ::= (CondStatementWrapper) CondStatement2:C1 {: RESULT=new CondStatementWrapper(C1); RESULT.setLine(C1left); :};
+
+CondStatement2 ::= (ConditionStmt) CondStatement:C1 OP_OR CondTerm:C2 {: RESULT=new ConditionStmt(C1, C2); RESULT.setLine(C1left); :}
 				| (CondBaseStatement) CondTerm:C1 {: RESULT=new CondBaseStatement(C1); RESULT.setLine(C1left); :};
 				
 CondTerm ::= (ConditionTerm) CondTerm:C1 OP_AND CondFact:C2 {: RESULT=new ConditionTerm(C1, C2); RESULT.setLine(C1left); :}

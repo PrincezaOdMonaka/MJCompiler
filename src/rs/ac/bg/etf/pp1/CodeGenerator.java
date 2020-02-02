@@ -25,6 +25,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	Stack<Integer> elseAddrStack = new Stack<>();
 	Stack<Integer> ifEndAddrStack = new Stack<>();
 	Stack<Integer> ifBeginAddrStack = new Stack<>();
+	Stack<Integer> nextOrAddrStack = new Stack<>();
 	int getMainPc(){
 		return mainPc;
 	}
@@ -187,7 +188,14 @@ public class CodeGenerator extends VisitorAdaptor {
     }
     
     public void visit(CondBaseTerm condFact) {
-    	// nothing, condFact value on e stack
+    	// condFact value on e stack
+        Code.loadConst(1);
+        Code.put(Code.jcc + Code.lt);
+        nextOrAddrStack.push(Code.pc);
+        Code.put2(0);
+        
+        // jump if 0, return 1 if 1
+        Code.loadConst(1);
     }
     
     public void visit(CondBaseStatement condBaseStmt) {
@@ -198,6 +206,14 @@ public class CodeGenerator extends VisitorAdaptor {
         Code.put2(0);
 
         Code.loadConst(0);
+    }
+    
+    public void visit(CondStatementWrapper condStmtWrapper) {
+    	int pc = Code.pc;
+    	while(!nextOrAddrStack.empty()) {
+        	int addr = nextOrAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
+    	}
     }
     
     public void visit(ConditionStatement condStatement) {
@@ -213,6 +229,13 @@ public class CodeGenerator extends VisitorAdaptor {
         
         int ifend = ifEndAddrStack.pop();
         Code.put2(ifend, pc - ifend + 1);
+        
+        
+        while(!nextOrAddrStack.empty()) {
+        	address = nextOrAddrStack.pop();
+            Code.put2(address, pc - address + 1);
+        }
+        
         
         while(!ifBlockEndAddrStack.isEmpty()) {
         	address = ifBlockEndAddrStack.pop();
