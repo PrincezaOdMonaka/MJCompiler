@@ -408,7 +408,7 @@ public class SemanticPass extends VisitorAdaptor {
     public void visit(FactorChar factorChar){
         factorChar.struct = Tab.charType;
     }
-    //nije ok
+    //nije ok error detection
     public void visit(FactorDesignator designator){
         designator.struct = designator.getDesignator().getDesignatorSpec().obj.getType();
     }

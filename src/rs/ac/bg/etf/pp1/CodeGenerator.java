@@ -239,4 +239,9 @@ public class CodeGenerator extends VisitorAdaptor {
         Code.put2(0);
     }
     
+    public void visit(ConditionTerm condTerm ) {
+    	// top && top-1 of estack
+    	Code.put(Code.mul);
+    }
+    
 }
