@@ -191,7 +191,13 @@ public class CodeGenerator extends VisitorAdaptor {
     }
     
     public void visit(CondBaseStatement condBaseStmt) {
-    	// nothing, condFact value on e stack
+    	// condTerm value on e stack
+        Code.loadConst(0);
+        Code.put(Code.jcc + Code.gt);
+        ifBeginAddrStack.push(Code.pc);
+        Code.put2(0);
+
+        Code.loadConst(0);
     }
     
     public void visit(ConditionStatement condStatement) {
@@ -255,7 +261,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	public void visit(ConditionStmt condStmt) {
        Code.put(Code.add);
        Code.loadConst(0);
-       Code.put(Code.jcc + Code.gt);
+       Code.put(Code.jcc + Code.gt); // if true fall into if statement immediately
        ifBeginAddrStack.push(Code.pc);
        Code.put2(0);
 
