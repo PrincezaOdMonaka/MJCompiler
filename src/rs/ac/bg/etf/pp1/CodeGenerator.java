@@ -193,13 +193,18 @@ public class CodeGenerator extends VisitorAdaptor {
     	if(forConds) {} 
     	else {
 	    	// condFact value on e stack
-	        Code.loadConst(1);
-	        Code.put(Code.jcc + Code.lt);
-	        nextOrAddrStack.push(Code.pc);
-	        Code.put2(0);
-	        
-	        // jump if 0, return 1 if 1
-	        Code.loadConst(1);
+    		Code.loadConst(0);
+            Code.put(Code.jcc + Code.eq);
+    	        Code.put2(7);
+    	     // true
+    	     Code.loadConst(1);
+    	     Code.put(Code.jmp);
+    	     Code.put2(7);   
+    	     //false                                                                         
+    	     Code.loadConst(0);
+    	     Code.put(Code.jmp); 
+    	     nextOrAddrStack.push(Code.pc);
+            Code.put2(0);
     	}
     }
     
@@ -209,13 +214,19 @@ public class CodeGenerator extends VisitorAdaptor {
     	// condTerm value on e stack
     	if(forConds) {} 
     	else {
+    		int pc = Code.pc;
+        	if(!nextOrAddrStack.empty()) {
+            	int addr = nextOrAddrStack.pop();
+            	Code.put2(addr, pc - addr + 1);
+        	}
+        	
 	        Code.loadConst(0);
 	        Code.put(Code.jcc + Code.gt);
-		        Code.put2(4);
+		        Code.put2(7);
 		     // false
 		     Code.loadConst(0);
 		     Code.put(Code.jmp);
-		     Code.put2(4);   
+		     Code.put2(7);   
 		     //true                                                                             
 		     Code.loadConst(1);
 		     Code.put(Code.jmp); 
@@ -299,6 +310,12 @@ public class CodeGenerator extends VisitorAdaptor {
     }
     
 	public void visit(ConditionStmt condStmt) {
+    	int pc = Code.pc;
+    	if(!nextOrAddrStack.empty()) {
+        	int addr = nextOrAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
+    	}
+    	
        Code.put(Code.add);
        Code.loadConst(0);
        Code.put(Code.jcc + Code.gt); // if true fall into if statement immediately
