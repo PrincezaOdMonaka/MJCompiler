@@ -74,6 +74,11 @@ terminal Character CHAR_CONST;
 terminal String IDENT ;
 terminal IF, ELSE;
 
+nonterminal ForCondBegin ForCondBegin;
+nonterminal ForJump ForJump;
+nonterminal ForCondition ForCondition;
+nonterminal ForLoopOp ForLoopOp;
+
 nonterminal IndexMid IndexMid;
 nonterminal MethodDeclList MethodDeclList;
 nonterminal DeclList DeclList;
@@ -88,7 +93,6 @@ nonterminal Relop Relop;
 nonterminal StatementList StatementList;
 nonterminal Statement Statement;
 nonterminal DesignatorStmtOpt DesignatorStmtOpt;
-nonterminal CondStatementOpt CondStatementOpt;
 nonterminal OneOrBlockStatement OneOrBlockStatement;
 nonterminal CondStatement CondStatement;
 nonterminal CondStatement2 CondStatement2;
@@ -309,10 +313,7 @@ CondTerm ::= (ConditionTerm) CondTerm:C1 OP_AND CondFact:C2 {: RESULT=new Condit
 			
 CondFact ::= (CondFactSimple) Expr:E1 {: RESULT=new CondFactSimple(E1); RESULT.setLine(E1left); :}
 			| (CondFactRelop) Expr:lhs Relop:R1 Expr:rhs {: RESULT=new CondFactRelop(lhs, R1, rhs); RESULT.setLine(lhsleft); :};
-			
-CondStatementOpt ::= (CondStmtOpt) CondStatement:C1 {: RESULT=new CondStmtOpt(C1); RESULT.setLine(C1left); :}
-					| (NoCondStmt) {: RESULT=new NoCondStmt(); :}
-					;
+
 			  
 Expr ::= (ExprList) Expr:E1 Addop:A2 Term:T3 {: RESULT=new ExprList(E1, A2, T3); RESULT.setLine(E1left); :}
 	|
@@ -356,9 +357,17 @@ ActualParamList ::= (ActualParams) ActualParamList:A1 OP_COMMA Expr:E2 {: RESULT
 					(ActualParam) Expr:E1 {: RESULT=new ActualParam(E1); RESULT.setLine(E1left); :}
 					;
 
+ForCondBegin ::= (ForCondBegin) {: RESULT=new ForCondBegin(); :};
+			
+ForCondition ::= (ForCond) CondStatement2:C1 {: RESULT=new ForCond(C1); RESULT.setLine(C1left); :}
+			| (NoForCond) {: RESULT=new NoForCond(); :} ;			
+	
+ForLoopOp ::= (ForLoopOp) DesignatorStmtOpt:D1 {: RESULT=new ForLoopOp(D1); RESULT.setLine(D1left); :};
+ForJump ::= (ForJump) {: RESULT=new ForJump(); :};
+
 ForStmt ::= (ForStmtOne) FOR OP_LEFT_PAREN DesignatorStmtOpt:D1 OP_SEMICOLON 
-					CondStatementOpt:C2 OP_SEMICOLON DesignatorStmtOpt:D3 OP_RIGHT_PAREN
-					OneOrBlockStatement:O4 {: RESULT=new ForStmtOne(D1, C2, D3, O4); RESULT.setLine(D1left); :};
+					ForCondBegin:F2 ForCondition:F3 OP_SEMICOLON ForLoopOp:F4 ForJump:F5 OP_RIGHT_PAREN
+					OneOrBlockStatement:O6 {: RESULT=new ForStmtOne(D1, F2, F3, F4, F5, O6); RESULT.setLine(D1left); :};
 
 Addop ::= (Addopr) OP_PLUS {: RESULT=new Addopr(); :} | (Subopr) OP_MINUS {: RESULT=new Subopr(); :}     |
     (AddopError) error OP_SEMICOLON {: parser.report_error_on_err_token("Error in addop declaration"); :} {: RESULT=new AddopError(); :}

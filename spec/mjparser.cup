@@ -74,9 +74,11 @@ terminal Character CHAR_CONST;
 terminal String IDENT ;
 terminal IF, ELSE;
 
+nonterminal ForCondBegin, ForJump, ForCondition, ForLoopOp;
+
 nonterminal IndexMid, MethodDeclList, DeclList;
 nonterminal FormalParamList, FormalParamDecl, FormParams, ActualParamList, ForStmt, Addop, Mulop, Relop; 
-nonterminal StatementList, Statement, DesignatorStmtOpt, CondStatementOpt, OneOrBlockStatement;
+nonterminal StatementList, Statement, DesignatorStmtOpt, OneOrBlockStatement;
 nonterminal CondStatement, CondStatement2, CondTerm, CondFact, ElseStatement;
 
 nonterminal VarDeclBase, IfEnd;
@@ -284,10 +286,7 @@ CondTerm ::= (ConditionTerm) CondTerm OP_AND CondFact
 			
 CondFact ::= (CondFactSimple) Expr
 			| (CondFactRelop) Expr:lhs Relop Expr:rhs;
-			
-CondStatementOpt ::= (CondStmtOpt) CondStatement
-					| (NoCondStmt)
-					;
+
 			  
 Expr ::= (ExprList) Expr Addop Term
 	|
@@ -331,8 +330,16 @@ ActualParamList ::= (ActualParams) ActualParamList OP_COMMA Expr
 					(ActualParam) Expr
 					;
 
+ForCondBegin ::= (ForCondBegin);
+			
+ForCondition ::= (ForCond) CondStatement2
+			| (NoForCond) ;			
+	
+ForLoopOp ::= (ForLoopOp) DesignatorStmtOpt;
+ForJump ::= (ForJump);
+
 ForStmt ::= (ForStmtOne) FOR OP_LEFT_PAREN DesignatorStmtOpt OP_SEMICOLON 
-					CondStatementOpt OP_SEMICOLON DesignatorStmtOpt OP_RIGHT_PAREN
+					ForCondBegin ForCondition OP_SEMICOLON ForLoopOp ForJump OP_RIGHT_PAREN
 					OneOrBlockStatement;
 
 Addop ::= (Addopr) OP_PLUS | (Subopr) OP_MINUS     |

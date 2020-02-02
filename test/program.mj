@@ -2,6 +2,7 @@ program MJProgram
 	int a[];
 	int b;
 	char e;
+	int drugi;
 {
 	void c() {
 		print('c');
@@ -21,6 +22,16 @@ program MJProgram
 		else {
 			p();
 			b = d();
+		}
+		
+		for(b=10; b>0 ; b--){
+			print(b);
+			if(b%3==0)
+				print('n');
+			else if (b==5) {
+				for(drugi = 0; drugi < 6; drugi=drugi+1)
+					print('d');
+			} else print('e');
 		}
 		
 		a = new int[2];

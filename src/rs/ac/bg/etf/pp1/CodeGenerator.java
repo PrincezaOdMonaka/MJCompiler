@@ -27,6 +27,13 @@ public class CodeGenerator extends VisitorAdaptor {
 	Stack<Integer> ifEndAddrStack = new Stack<>();
 	Stack<Integer> ifBeginAddrStack = new Stack<>();
 	Stack<Integer> nextOrAddrStack = new Stack<>();
+	
+	Stack<Integer> forTop = new Stack<>(); // condition calc begin
+	Stack<Integer> forBottom = new Stack<>();
+	Stack<Integer> getForBottom = new Stack<>(); // break & cond check jump
+	Stack<Integer> loopOpAddr = new Stack<>(); // where to jump for new iteration
+	Stack<Integer> forCondJump = new Stack<>();
+	
 	int getMainPc(){
 		return mainPc;
 	}
@@ -190,8 +197,6 @@ public class CodeGenerator extends VisitorAdaptor {
     
     // and
     public void visit(CondBaseTerm condFact) {
-    	if(forConds) {} 
-    	else {
 	    	// condFact value on e stack
     		Code.loadConst(0);
             Code.put(Code.jcc + Code.eq);
@@ -205,38 +210,35 @@ public class CodeGenerator extends VisitorAdaptor {
     	     Code.put(Code.jmp); 
     	     nextOrAddrStack.push(Code.pc);
             Code.put2(0);
-    	}
+
     }
     
     
     // or
     public void visit(CondBaseStatement condBaseStmt) {
-    	// condTerm value on e stack
-    	if(forConds) {} 
-    	else {
-    		int pc = Code.pc;
-        	if(!nextOrAddrStack.empty()) {
-            	int addr = nextOrAddrStack.pop();
-            	Code.put2(addr, pc - addr + 1);
-        	}
-        	
-	        Code.loadConst(0);
-	        Code.put(Code.jcc + Code.gt);
-		        Code.put2(7);
-		     // false
-		     Code.loadConst(0);
-		     Code.put(Code.jmp);
-		     Code.put2(7);   
-		     //true                                                                             
-		     Code.loadConst(1);
-		     Code.put(Code.jmp); 
-	        ifBeginAddrStack.push(Code.pc);
-	        Code.put2(0);
-	        Code.loadConst(0);
+		int pc = Code.pc;
+    	if(!nextOrAddrStack.empty()) {
+        	int addr = nextOrAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
     	}
+    	
+        Code.loadConst(0);
+        Code.put(Code.jcc + Code.gt);
+	        Code.put2(7);
+	     // false
+	     Code.loadConst(0);
+	     Code.put(Code.jmp);
+	     Code.put2(7);   
+	     //true                                                                             
+	     Code.loadConst(1);
+	     Code.put(Code.jmp); 
+        ifBeginAddrStack.push(Code.pc);
+        Code.put2(0);
+        Code.loadConst(0);
     }
     
     public void visit(CondStatementWrapper condStmtWrapper) {
+    	ifBlockEndAddrStack.push(-1);
     }
     
     public void visit(ConditionStatement condStatement) {
@@ -267,6 +269,7 @@ public class CodeGenerator extends VisitorAdaptor {
         
         while(!ifBlockEndAddrStack.isEmpty()) {
         	address = ifBlockEndAddrStack.pop();
+        	if(address==-1) break;
             Code.put2(address, pc - address + 1);
         }
     }
@@ -324,4 +327,107 @@ public class CodeGenerator extends VisitorAdaptor {
 
        Code.loadConst(0); // leave false on stack
     }
+	
+	public void visit(NoForCond noForCond) {
+		Code.loadConst(1);
+		Code.put(Code.jmp);
+		forCondJump.push(Code.pc);
+		Code.put2(0);
+    	
+		loopOpAddr.push(Code.pc);
+	}
+	
+	public void visit(ForCond forCond) {
+		
+		forConds = false;
+		// for continue
+		
+		// optimized and and or true jump address
+        
+        int pc = Code.pc; // loop condition jump check address
+        while(!ifBeginAddrStack.empty()) {
+        	int addr = ifBeginAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
+        	
+        }
+        
+    	// cleanup for last and
+    	while(!nextOrAddrStack.empty()) {
+        	int addr = nextOrAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
+    	}
+    	
+		Code.put(Code.jmp);
+		forCondJump.push(Code.pc);
+		Code.put2(0);
+    	
+		loopOpAddr.push(Code.pc);
+	}
+	
+	public void visit(ForCondBegin begin) {
+		forTop.push(Code.pc);
+		getForBottom.push(-1);
+		forConds = true;
+	}
+	
+	public void visit(ForJump forJump) {
+		while(!forCondJump.empty()) {
+			int addr = forCondJump.pop();
+			Code.put2(addr, Code.pc - addr + 1);
+		}
+		
+       	Code.loadConst(0);
+        Code.put(Code.jcc + Code.eq);
+        getForBottom.push(Code.pc);
+        Code.put2(0);
+	}
+	
+	public void visit(ForLoopOp loopOp) {
+		Code.put(Code.jmp);
+		int adr = forTop.peek();
+		Code.put2(adr - Code.pc + 1); // beginning of condition calculation
+	}
+	
+	public void visit(BreakStatement breakStmt) {
+		Code.put(Code.jmp);
+		getForBottom.push(Code.pc);
+		Code.put2(0);
+	}
+	
+	public void visit(ContinueStatement continueStmt) {
+		Code.put(Code.jmp);
+		Code.put2(loopOpAddr.peek() - Code.pc + 1);
+	}
+	
+	public void visit(ForStmtOne forStmt) {
+		Code.put(Code.jmp);
+		Code.put2(loopOpAddr.peek() - Code.pc + 1); // jump to loop calculation
+
+		while(!getForBottom.empty()) {
+			int addr = getForBottom.pop();
+			if(addr==-1) break;
+			Code.put2(addr, Code.pc - addr + 1);
+		}
+		
+		loopOpAddr.pop();
+		forTop.pop();
+	}
+	
+	public void visit(DesignatorStmtPostinc designator) {
+        designator.getDesignator().getDesignatorSpec().traverseBottomUp(this);
+		Code.load(designator.getDesignator().getDesignatorSpec().obj);
+        Code.loadConst(1);
+        Code.put(Code.add);
+		Code.store(designator.getDesignator().getDesignatorSpec().obj);
+	}
+	
+	public void visit(DesignatorStmtPostdec designator) {
+        designator.getDesignator().getDesignatorSpec().traverseBottomUp(this);
+		Code.load(designator.getDesignator().getDesignatorSpec().obj);
+        Code.loadConst(1);
+        Code.put(Code.sub);
+		Code.store(designator.getDesignator().getDesignatorSpec().obj);
+	}
+
 }
+
