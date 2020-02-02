@@ -21,9 +21,10 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	Logger log = Logger.getLogger(getClass());
 	
-	Stack<Integer> ifAddrStack = new Stack<>();
+	Stack<Integer> ifBlockEndAddrStack = new Stack<>();
 	Stack<Integer> elseAddrStack = new Stack<>();
 	Stack<Integer> ifEndAddrStack = new Stack<>();
+	Stack<Integer> ifBeginAddrStack = new Stack<>();
 	int getMainPc(){
 		return mainPc;
 	}
@@ -163,7 +164,7 @@ public class CodeGenerator extends VisitorAdaptor {
     
     // Conditions
     
-    //ifAddrStack
+    //ifBlockEndAddrStack
     
     int getRelOpCode(Relop relOp) {
         if (relOp instanceof RelopEq) return Code.eq;
@@ -200,15 +201,15 @@ public class CodeGenerator extends VisitorAdaptor {
         
         int elseRet = elseAddrStack.pop();
         if(elseRet != -1) {
-        	address = ifAddrStack.pop();
+        	address = ifBlockEndAddrStack.pop();
         	Code.put2(address, elseRet - address + 1);
         }
         
         int ifend = ifEndAddrStack.pop();
         Code.put2(ifend, pc - ifend + 1);
         
-        while(!ifAddrStack.isEmpty()) {
-        	address = ifAddrStack.pop();
+        while(!ifBlockEndAddrStack.isEmpty()) {
+        	address = ifBlockEndAddrStack.pop();
             Code.put2(address, pc - address + 1);
         }
     }
@@ -219,8 +220,15 @@ public class CodeGenerator extends VisitorAdaptor {
         Code.put(Code.jcc + Code.eq);
         Code.put2(6);
         Code.put(Code.jmp);
-        ifAddrStack.push(Code.pc);
+        ifBlockEndAddrStack.push(Code.pc);
         Code.put2(0);
+        
+        int pc = Code.pc;
+        while(!ifBeginAddrStack.empty()) {
+        	int addr = ifBeginAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
+        	
+        }
     }
 
     public void visit(NoElseStmt noElse) {
@@ -244,4 +252,13 @@ public class CodeGenerator extends VisitorAdaptor {
     	Code.put(Code.mul);
     }
     
+	public void visit(ConditionStmt condStmt) {
+       Code.put(Code.add);
+       Code.loadConst(0);
+       Code.put(Code.jcc + Code.gt);
+       ifBeginAddrStack.push(Code.pc);
+       Code.put2(0);
+
+       Code.loadConst(0); // leave false on stack
+    }
 }

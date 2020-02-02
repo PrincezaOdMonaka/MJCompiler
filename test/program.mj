@@ -16,7 +16,7 @@ program MJProgram
 	void main() {
 		b = 6;
 		e = 'g';
-		if(b>=9 && e=='5')
+		if(b==5 || e=='5' || true)
 			c();
 		else {
 			p();
