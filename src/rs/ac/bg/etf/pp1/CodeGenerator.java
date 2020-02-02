@@ -18,6 +18,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	int varDataSize;
 	int boolFalse = 0;
 	int boolTrue = 1;
+	boolean forConds = false;
 	
 	Logger log = Logger.getLogger(getClass());
 	
@@ -187,33 +188,44 @@ public class CodeGenerator extends VisitorAdaptor {
         Code.loadConst(1);
     }
     
+    // and
     public void visit(CondBaseTerm condFact) {
-    	// condFact value on e stack
-        Code.loadConst(1);
-        Code.put(Code.jcc + Code.lt);
-        nextOrAddrStack.push(Code.pc);
-        Code.put2(0);
-        
-        // jump if 0, return 1 if 1
-        Code.loadConst(1);
+    	if(forConds) {} 
+    	else {
+	    	// condFact value on e stack
+	        Code.loadConst(1);
+	        Code.put(Code.jcc + Code.lt);
+	        nextOrAddrStack.push(Code.pc);
+	        Code.put2(0);
+	        
+	        // jump if 0, return 1 if 1
+	        Code.loadConst(1);
+    	}
     }
     
+    
+    // or
     public void visit(CondBaseStatement condBaseStmt) {
     	// condTerm value on e stack
-        Code.loadConst(0);
-        Code.put(Code.jcc + Code.gt);
-        ifBeginAddrStack.push(Code.pc);
-        Code.put2(0);
-
-        Code.loadConst(0);
+    	if(forConds) {} 
+    	else {
+	        Code.loadConst(0);
+	        Code.put(Code.jcc + Code.gt);
+		        Code.put2(4);
+		     // false
+		     Code.loadConst(0);
+		     Code.put(Code.jmp);
+		     Code.put2(4);   
+		     //true                                                                             
+		     Code.loadConst(1);
+		     Code.put(Code.jmp); 
+	        ifBeginAddrStack.push(Code.pc);
+	        Code.put2(0);
+	        Code.loadConst(0);
+    	}
     }
     
     public void visit(CondStatementWrapper condStmtWrapper) {
-    	int pc = Code.pc;
-    	while(!nextOrAddrStack.empty()) {
-        	int addr = nextOrAddrStack.pop();
-        	Code.put2(addr, pc - addr + 1);
-    	}
     }
     
     public void visit(ConditionStatement condStatement) {
@@ -226,6 +238,11 @@ public class CodeGenerator extends VisitorAdaptor {
         	address = ifBlockEndAddrStack.pop();
         	Code.put2(address, elseRet - address + 1);
         }
+        
+    	if(!nextOrAddrStack.empty()) {
+        	int addr = nextOrAddrStack.pop();
+        	Code.put2(addr, pc - addr + 1);
+    	}
         
         int ifend = ifEndAddrStack.pop();
         Code.put2(ifend, pc - ifend + 1);

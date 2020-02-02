@@ -276,7 +276,7 @@ ElseBegin ::= (ElseBegin);
 
 CondStatement ::= (CondStatementWrapper) CondStatement2;
 
-CondStatement2 ::= (ConditionStmt) CondStatement OP_OR CondTerm
+CondStatement2 ::= (ConditionStmt) CondStatement2 OP_OR CondTerm
 				| (CondBaseStatement) CondTerm;
 				
 CondTerm ::= (ConditionTerm) CondTerm OP_AND CondFact

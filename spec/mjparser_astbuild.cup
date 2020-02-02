@@ -301,7 +301,7 @@ ElseBegin ::= (ElseBegin) {: RESULT=new ElseBegin(); :};
 
 CondStatement ::= (CondStatementWrapper) CondStatement2:C1 {: RESULT=new CondStatementWrapper(C1); RESULT.setLine(C1left); :};
 
-CondStatement2 ::= (ConditionStmt) CondStatement:C1 OP_OR CondTerm:C2 {: RESULT=new ConditionStmt(C1, C2); RESULT.setLine(C1left); :}
+CondStatement2 ::= (ConditionStmt) CondStatement2:C1 OP_OR CondTerm:C2 {: RESULT=new ConditionStmt(C1, C2); RESULT.setLine(C1left); :}
 				| (CondBaseStatement) CondTerm:C1 {: RESULT=new CondBaseStatement(C1); RESULT.setLine(C1left); :};
 				
 CondTerm ::= (ConditionTerm) CondTerm:C1 OP_AND CondFact:C2 {: RESULT=new ConditionTerm(C1, C2); RESULT.setLine(C1left); :}
