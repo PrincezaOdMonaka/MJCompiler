@@ -332,7 +332,7 @@ ActualParamList ::= (ActualParams) ActualParamList OP_COMMA Expr
 
 ForCondBegin ::= (ForCondBegin);
 			
-ForCondition ::= (ForCond) CondStatement2
+ForCondition ::= (ForCond) CondStatement
 			| (NoForCond) ;			
 	
 ForLoopOp ::= (ForLoopOp) DesignatorStmtOpt;

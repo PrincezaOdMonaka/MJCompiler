@@ -173,7 +173,7 @@ public class SemanticPass extends VisitorAdaptor {
     	Tab.chainLocalSymbols(methodDecl.getMethodTypeName().obj);
     	Tab.closeScope();
     	if(method.getName().equals("main") && 
-    			(method.getType()!=Tab.noType || method.getLocalSymbols().size()!=0)) {
+    			(method.getType()!=Tab.noType)) {
     		reportError("Bad definition of main function ", methodDecl);
     	}
     	method = null;
@@ -558,6 +558,26 @@ public class SemanticPass extends VisitorAdaptor {
     	Tab.chainLocalSymbols(program.getProgName().obj);
     	Tab.closeScope();
     }
+    
+	public void visit(BreakStatement breakStmt) {
+		SyntaxNode parent;
+		for(parent = breakStmt.getParent(); 
+				!(parent instanceof ForStmtOne) && !(parent instanceof MethodDecl); 
+				parent = parent.getParent());
+		if(!(parent instanceof ForStmtOne)) {
+			reportError("Break cannot be outside of loop ", breakStmt);
+		}
+	}
+	
+	public void visit(ContinueStatement continueStmt) {
+		SyntaxNode parent;
+		for(parent = continueStmt.getParent(); 
+				!(parent instanceof ForStmtOne) && !(parent instanceof MethodDecl); 
+				parent = parent.getParent());
+		if(!(parent instanceof ForStmtOne)) {
+			reportError("Continue cannot be outside of loop ", continueStmt);
+		}
+	}
     
     boolean passed() { return !errorsFound; }
     
